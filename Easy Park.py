@@ -3,6 +3,7 @@ from tkinter import messagebox
 from verify_email import verify_email
 from tkcalendar import DateEntry
 from geopy.geocoders import Nominatim
+import requests
 
 TitleFont = ("Castellar", 50, "bold")
 TextFont = ("Times New Roman", 12)
@@ -120,6 +121,14 @@ class SignUpPage(Frame):
                         if not email:
                             messagebox.showerror('Error', message='Email enter is increase!')
             else:
+                
+                url = 'http://127.0.0.1:8000/users/signup/'
+                data = {'first_name': 'Greg', 'last_name' : 'Kent', 'username': 'gk', 'email': 'gk@yahoo.com', 'password': '123' }
+                response = requests.post(url , data)
+
+                response = requests.get('http://127.0.0.1:8000/users/')
+                
+                print(response.json())
                 messagebox.showinfo(title="Success", message="Successfully Signed Up")
 
         r = StringVar()
