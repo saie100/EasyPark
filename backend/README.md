@@ -1,11 +1,11 @@
 # Installing and running backend Django server
 
 ## Packages and dependencies installs
-Installing pip3 (If you have pip3 skip this step)
+Installing pip3 (If you have pip3, skip this step)
 ```console
 sudo apt install python3-pip
 ```
-Installing postgresql database (If you have postgresql skip this step)
+Installing postgresql database (If you have postgresql, skip this step)
 ```console
 sudo apt install postgresql postgresql-contrib
 ```
@@ -19,7 +19,7 @@ python3 -m pip install psycopg2-binary
 ```
 
 ## Django server
-In the "easypark_backend" root directory, run the following command:
+In the "easypark_backend" root directory, run the following commands:
 ```console
 python3 manage.py makemigrations
 python3 manage.py migrate
