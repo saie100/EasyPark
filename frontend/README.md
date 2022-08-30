@@ -1,7 +1,7 @@
 # Installing and running frontend GUI
 
 ## Packages and dependencies installs
-Installing Pip3
+Installing pip3 (If you have pip3, skip this step)
 ```console
 sudo apt install python3-pip
 ```
