@@ -21,6 +21,13 @@ Installing Python geopy library
 ```console
 python3 -m pip install geopy
 ```
+```console
+sudo apt-get install python3-tk
+```
+```console
+pip3 install verify-email
+```
+
 ## Running GUI
 In the frontend root directory, run the following command:
 ```console
