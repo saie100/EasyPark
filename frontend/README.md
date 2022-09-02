@@ -22,7 +22,7 @@ Installing Python Tkinter Pillow for images
 python3 -m pip install pillow
 ```
 Installing Python Tkinter Email Verification
-```
+```console
 pip3 install verify-email
 ```
 
