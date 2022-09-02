@@ -17,9 +17,9 @@ Installing Tkinter calendar library
 ```console
 python3 -m pip install tkcalendar
 ```
-Installing Python geopy library
+Installing Python Pillow for images
 ```console
-python3 -m pip install geopy
+python3 -m pip install pillow
 ```
 ```console
 sudo apt-get install python3-tk
