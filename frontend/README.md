@@ -17,14 +17,11 @@ Installing Tkinter calendar library
 ```console
 python3 -m pip install tkcalendar
 ```
-Installing Python Pillow for images
+Installing Python Tkinter Pillow for images
 ```console
 python3 -m pip install pillow
+Installing Python Tkinter Email Verification
 ```
-```console
-sudo apt-get install python3-tk
-```
-```console
 pip3 install verify-email
 ```
 
