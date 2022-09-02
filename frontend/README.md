@@ -20,6 +20,7 @@ python3 -m pip install tkcalendar
 Installing Python Tkinter Pillow for images
 ```console
 python3 -m pip install pillow
+```
 Installing Python Tkinter Email Verification
 ```
 pip3 install verify-email
