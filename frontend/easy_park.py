@@ -269,11 +269,10 @@ class AddParkingPage(Frame):
 class ReservationPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        label = Label(self, text="Delete", font=TitleFont)
+        label = Label(self, text="Reservation", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=10)
 
-        logoff_button = Button(self, text="Confirm Delete", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
-        logoff_button.grid(row=5, column=1)
+        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).grid(row=1, column=0, padx=10, pady=10)
 
 
 # Update Account page
@@ -363,10 +362,10 @@ class AcctDeletePage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Delete", font=TitleFont)
-        label.grid(row=0, column=0, padx=10, pady=10)
-
-        logoff_button = Button(self, text="Confirm Delete", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
-        logoff_button.grid(row=5, column=1)
+        label.pack(pady=20)
+        
+        Button(self, text="Confirm Delete", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage)).pack(pady=20)
+        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).pack(pady=20)
 
 
 # Monthly Report Page
@@ -382,7 +381,7 @@ class ReportPage(Frame):
         label = Label(self, text="Please check back next month!", font=TextFont)
         label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
-        logoff_button = Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
+        logoff_button = Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage))
         logoff_button.grid(row=3, column=0, pady=20)
 
 
