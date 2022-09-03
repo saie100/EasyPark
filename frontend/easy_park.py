@@ -1,8 +1,11 @@
 from tkinter import *
 from tkinter import messagebox
-from verify_email import verify_email
-from tkcalendar import DateEntry
 from PIL import ImageTk, Image
+from tkcalendar import DateEntry
+from verify_email import verify_email
+from tkinter import filedialog
+import requests
+
 
 TitleFont = ("Comic Sans MS", 40, "bold")
 TextFont = ("Times", 12)
@@ -23,7 +26,7 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage):
+        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, AcctDeletePage, ReportPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -40,12 +43,15 @@ class LoginPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
 
+        # Validate Email and Password for login.
         def validate():
             account = email_entry.get()
             password = pw_entry.get()
             if account == "" or password == "":
                 messagebox.showerror('Error', message="Email and Password Can\'t be blank")
             elif account == "cse682" and password == "cse682":
+                email_entry.delete(0, 'end')
+                pw_entry.delete(0, 'end')
                 controller.show_frame(UserPage)
             else:
                 messagebox.showerror('Error', message="Incorrect Account and Password")
@@ -93,11 +99,17 @@ class UserPage(Frame):
         # Client interface
         client_button = Button(self, text="Client", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage))
         client_button.pack(padx=5, pady=20)
-        # Account update
-        update_button = Button(self, text="Update Account", bg="white", font=TextFont)
-        update_button.pack(padx=5, pady=20)
+        # View Reservation
+        edit_button = Button(self, text="View Reservation", bg="white", font=TextFont, command=lambda: controller.show_frame(ReservationPage))
+        edit_button.pack(padx=5, pady=20)
+        # Update Account
+        edit_button = Button(self, text="Update Account", bg="white", font=TextFont, command=lambda: controller.show_frame(AcctUpdatePage))
+        edit_button.pack(padx=5, pady=20)
         # Delete Account
-        delete_button = Button(self, text="Delete Account", bg="white", font=TextFont)
+        delete_button = Button(self, text="Delete Account", bg="white", font=TextFont, command=lambda: controller.show_frame(AcctDeletePage))
+        delete_button.pack(padx=5, pady=20)
+        # Monthly Report
+        delete_button = Button(self, text="Monthly Report", bg="white", font=TextFont, command=lambda: controller.show_frame(ReportPage))
         delete_button.pack(padx=5, pady=20)
         # Log Off
         logoff_button = Button(self, text="Log Off", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
@@ -147,21 +159,41 @@ class RenterPage(Frame):
         # Vehicle Type
         Label(self, text="Vehicle Type: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
         v_type.set("Compact")
-        vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact")
+        vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
         vehicle_type1.grid(row=5, column=1, sticky="w")
-        vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard")
+        vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
         vehicle_type2.grid(row=5, column=2, sticky="w")
-        vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV")
+        vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
         vehicle_type3.grid(row=6, column=1, pady=5, sticky="w")
-        vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize")
+        vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
         vehicle_type4.grid(row=6, column=2, sticky="w")
 
         Button(self, text="Search", font=TextFont, bg="white").grid(row=7, column=0, pady=15, sticky="e")
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=2, pady=15, sticky="w")
 
 
+# Renter - Searching Page
+class SearchingPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Find Parking Spot", font=TitleFont)
+        label.grid(row=0, column=0, columnspan=3, padx=10, pady=15)
+
+
 # Client Page
 class ClientPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Find Parking Spot", font=TitleFont)
+        label.pack(pady=20)
+
+        Button(self, text="Add Parking Spot", font=TextFont, bg="white", command=lambda: controller.show_frame(AddParkingPage)).pack(pady=20)
+        Button(self, text="View Parking Spot", font=TextFont, bg="white").pack(pady=20)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
+
+
+# Client - Add Parking Page
+class AddParkingPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Add Parking Spot", font=TitleFont)
@@ -173,6 +205,23 @@ class ClientPage(Frame):
 
         clicked = StringVar()
         clicked.set(time_option[0])
+
+        filename = StringVar()
+        # path_var = StringVar()
+
+        def save_png():
+            try:
+                global img
+                filetypes = [("PNG", "*.png"), ("JPG", "*.jpg"), ('All files', '*')]
+                filepath = filedialog.askopenfilenames(title='Open files', initialdir='C:/Users/Administrator/Desktop', filetypes=filetypes, defaultextension='.jpg')
+                filename.set(filepath)
+                img = Image.open(filename.get())
+
+                # filenewpath = filedialog.asksaveasfilename(title='upload', filetypes=filetypes, defaultextension='.png', initialdir='C:/Users/Administrator/Desktop')
+                # path_var.set(filenewpath)
+                # img.save(str(path_var.get()))
+            except Exception as e:
+                print(e)
 
         v_type = StringVar()
 
@@ -190,30 +239,151 @@ class ClientPage(Frame):
         end_time = OptionMenu(self, clicked, *time_option)
         end_time.grid(row=2, column=2)
 
-        # Location - City
-        Label(self, text="City: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
+        # Location
+        Label(self, text="Location: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
         city_entry = Entry(self, font=TextFont)
         city_entry.grid(row=3, column=1)
 
-        # Location - State
-        Label(self, text="State: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
-        state_entry = Entry(self, font=TextFont)
-        state_entry.grid(row=4, column=1)
-
         # Vehicle Type
-        Label(self, text="Vehicle Type: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
+        Label(self, text="Vehicle Type Fit In Garage: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
         v_type.set("Compact")
-        vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact")
-        vehicle_type1.grid(row=5, column=1, sticky="w")
-        vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard")
-        vehicle_type2.grid(row=5, column=2, sticky="w")
-        vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV")
-        vehicle_type3.grid(row=6, column=1, pady=5, sticky="w")
-        vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize")
-        vehicle_type4.grid(row=6, column=2, sticky="w")
+        vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
+        vehicle_type1.grid(row=4, column=1, sticky="w")
+        vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
+        vehicle_type2.grid(row=4, column=2, sticky="w")
+        vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
+        vehicle_type3.grid(row=5, column=1, pady=5, sticky="w")
+        vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
+        vehicle_type4.grid(row=5, column=2, sticky="w")
 
-        Button(self, text="Search", font=TextFont).grid(row=7, column=0, columnspan=3, pady=15)
+        # Upload image
+        Label(self, text="Image: ", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
+        # Button(self, text="image path", command=open_img).grid(row=7, column=1, pady=15)
+        Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=6, column=1, pady=15)
+
+        Button(self, text="Add", font=TextFont, bg="white").grid(row=7, column=0, pady=15)
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=2, pady=15, sticky="w")
+
+
+# Reservation page
+class ReservationPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Delete", font=TitleFont)
+        label.grid(row=0, column=0, padx=10, pady=10)
+
+        logoff_button = Button(self, text="Confirm Delete", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
+        logoff_button.grid(row=5, column=1)
+
+
+# Update Account page
+class AcctUpdatePage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Update", font=TitleFont)
+        label.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
+        Label(self, text="*Please fill in what you would like to update:", font=("Times", 15)).grid(row=1, column=0, columnspan=2, pady=5, sticky="nw")
+
+        def update():
+            if firstname != "":
+                new_firstname = firstname
+            if lastname != "":
+                new_lastname = lastname
+            if email != "":
+                new_email = email
+            if phone != "":
+                new_phone = phone
+            if password != "":
+                new_password = password
+            if bank != "":
+                new_bank = bank
+            if routing != "":
+                new_routing = routing
+            if account != "":
+                new_account = account
+            controller.show_frame(UserPage)
+
+        # First Name
+        Label(self, text="First Name:*", font=TextFont).grid(row=2, column=0, pady=5, sticky="e")
+        fn_entry = Entry(self, font=TextFont)
+        fn_entry.grid(row=2, column=1, sticky="w")
+
+        # Last Name
+        Label(self, text="Last Name:*", font=TextFont).grid(row=3, column=0, pady=5, sticky="e")
+        ln_entry = Entry(self, font=TextFont)
+        ln_entry.grid(row=3, column=1, sticky="w")
+
+        # Email
+        Label(self, text="Email Address:*", font=TextFont).grid(row=4, column=0, pady=5, sticky="e")
+        email_entry = Entry(self, font=TextFont)
+        email_entry.grid(row=4, column=1, sticky="w")
+
+        # Phone Number
+        Label(self, text="Phone#:*", font=TextFont).grid(row=5, column=0, pady=5, sticky="e")
+        phone_entry = Entry(self, font=("Comic Sans MS", 10))
+        phone_entry.grid(row=5, column=1, sticky="w")
+
+        # Password
+        Label(self, text="Password:*", font=TextFont).grid(row=6, column=0, pady=5, sticky="e")
+        pw_entry = Entry(self, font=TextFont)
+        pw_entry.grid(row=6, column=1, sticky="w")
+
+        # Bank Info
+        Label(self, text="Bank Name:*", font=TextFont).grid(row=8, column=0, pady=5, sticky="e")
+        bank_entry = Entry(self, font=TextFont)
+        bank_entry.grid(row=8, column=1, sticky="w")
+
+        # Routing Number
+        Label(self, text="Routing Number:*", font=TextFont).grid(row=9, column=0, sticky="e")
+        routing_entry = Entry(self, font=TextFont)
+        routing_entry.grid(row=9, column=1, sticky="w")
+
+        # Account Number
+        Label(self, text="Account Number:*", font=TextFont).grid(row=10, column=0, pady=5, sticky="e")
+        account_entry = Entry(self, font=TextFont)
+        account_entry.grid(row=10, column=1, sticky="w")
+
+        logoff_button = Button(self, text="Confirm Update", font=TextFont, bg="white", command=update)
+        logoff_button.grid(row=11, column=1, columnspan=2)
+
+        # Getter
+        firstname = fn_entry.get()
+        lastname = ln_entry.get()
+        email_input = email_entry.get()
+        email = verify_email(email_input)
+        phone = phone_entry.get()
+        password = pw_entry.get()
+        bank = bank_entry.get()
+        routing = routing_entry.get()
+        account = account_entry.get()
+
+
+# Delete Account page
+class AcctDeletePage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Delete", font=TitleFont)
+        label.grid(row=0, column=0, padx=10, pady=10)
+
+        logoff_button = Button(self, text="Confirm Delete", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
+        logoff_button.grid(row=5, column=1)
+
+
+# Monthly Report Page
+class ReportPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Monthly Report", font=TitleFont)
+        label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        label = Label(self, text="There are no reports for your account at this time.", font=TextFont)
+        label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
+        label = Label(self, text="Please check back next month!", font=TextFont)
+        label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+        logoff_button = Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
+        logoff_button.grid(row=3, column=0, pady=20)
 
 
 # Sign Up Page
@@ -233,6 +403,15 @@ class SignUpPage(Frame):
                         if not email_verify:
                             messagebox.showerror('Error', message='Email enter is increase!')
             else:
+                messagebox.showinfo(title="Success", message="Successfully Signed Up")
+                url = 'http://127.0.0.1:8000/users/signup/'
+                data = {'first_name': 'Greg', 'last_name': 'Kent', 'username': 'gk', 'email': 'gk@yahoo.com',
+                        'password': '123'}
+                response = requests.post(url, data)
+
+                response = requests.get('http://127.0.0.1:8000/users/')
+
+                print(response.json())
                 messagebox.showinfo(title="Success", message="Successfully Signed Up")
 
         Label(self, text="*Please fill in this form to create an account:", font=("Times", 15)).grid(row=1, column=0, columnspan=2, pady=5, sticky="nw")
