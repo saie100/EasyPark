@@ -1,11 +1,11 @@
 from tkinter import *
+
 from tkinter import messagebox
 from PIL import ImageTk, Image
 from tkcalendar import DateEntry
 from verify_email import verify_email
 from tkinter import filedialog
 import requests
-
 
 TitleFont = ("Comic Sans MS", 40, "bold")
 TextFont = ("Times", 12)
@@ -16,6 +16,7 @@ class EasyPark(Tk):
         Tk.__init__(self)
 
         # creating a container
+        self.eval("tk::PlaceWindow . center")
         self.geometry("600x700")
         self.title("EASY PARK")
         container = Frame(self)
@@ -26,7 +27,7 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, AcctDeletePage, ReportPage):
+        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -47,6 +48,7 @@ class LoginPage(Frame):
         def validate():
             account = email_entry.get()
             password = pw_entry.get()
+
             if account == "" or password == "":
                 messagebox.showerror('Error', message="Email and Password Can\'t be blank")
             elif account == "cse682" and password == "cse682":
@@ -146,15 +148,10 @@ class RenterPage(Frame):
         end_time = OptionMenu(self, clicked, *time_option)
         end_time.grid(row=2, column=2)
 
-        # Location - City
-        Label(self, text="City: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
+        # Location
+        Label(self, text="Location: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
         city_entry = Entry(self, font=TextFont)
         city_entry.grid(row=3, column=1)
-
-        # Location - State
-        Label(self, text="State: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
-        state_entry = Entry(self, font=TextFont)
-        state_entry.grid(row=4, column=1)
 
         # Vehicle Type
         Label(self, text="Vehicle Type: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
@@ -361,9 +358,9 @@ class AcctUpdatePage(Frame):
 class AcctDeletePage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        label = Label(self, text="Delete", font=TitleFont)
+        label = Label(self, text="Delete Account", font=TitleFont)
         label.pack(pady=20)
-        
+
         Button(self, text="Confirm Delete", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage)).pack(pady=20)
         Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).pack(pady=20)
 
@@ -402,15 +399,6 @@ class SignUpPage(Frame):
                         if not email_verify:
                             messagebox.showerror('Error', message='Email enter is increase!')
             else:
-                messagebox.showinfo(title="Success", message="Successfully Signed Up")
-                url = 'http://127.0.0.1:8000/users/signup/'
-                data = {'first_name': 'Greg', 'last_name': 'Kent', 'username': 'gk', 'email': 'gk@yahoo.com',
-                        'password': '123'}
-                response = requests.post(url, data)
-
-                response = requests.get('http://127.0.0.1:8000/users/')
-
-                print(response.json())
                 messagebox.showinfo(title="Success", message="Successfully Signed Up")
 
         Label(self, text="*Please fill in this form to create an account:", font=("Times", 15)).grid(row=1, column=0, columnspan=2, pady=5, sticky="nw")
