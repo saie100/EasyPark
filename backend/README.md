@@ -12,7 +12,7 @@ sudo apt install postgresql postgresql-contrib
 Installing django and dependencies
 ```console
 python3 -m pip install django==4.0.4
-python3 -m pip djangorestframework
+python3 -m pip install djangorestframework
 python3 -m pip install django-cors-headers
 python3 -m pip install django-secure-password-input
 python3 -m pip install psycopg2-binary
