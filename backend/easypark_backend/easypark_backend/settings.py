@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "rest_framework",
     'users',
     'parking_spot',
+    'payment_interface',
+
 ]
 
 MIDDLEWARE = [
