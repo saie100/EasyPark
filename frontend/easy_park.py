@@ -5,7 +5,9 @@ from PIL import ImageTk, Image
 from tkcalendar import DateEntry
 from verify_email import verify_email
 from tkinter import filedialog
+
 import requests
+
 
 TitleFont = ("Comic Sans MS", 40, "bold")
 TextFont = ("Times", 12)
@@ -27,7 +29,7 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage):
+        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage, SpotResPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -165,8 +167,43 @@ class RenterPage(Frame):
         vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
         vehicle_type4.grid(row=6, column=2, sticky="w")
 
-        Button(self, text="Search", font=TextFont, bg="white").grid(row=7, column=0, pady=15, sticky="e")
+        Button(self, text="Search", font=TextFont, bg="white", command=lambda: controller.show_frame(SpotResPage)).grid(row=7, column=0, pady=15, sticky="e")
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=2, pady=15, sticky="w")
+
+
+# Parking Spot Page
+class SpotResPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Available Parking", font=TitleFont)
+        label.grid(row=0, column=0, padx=10, pady=15)
+
+        results = ["parking 1", "parking 2", "parking 3"]
+        garage1 = Image.open("garage 1.jpg").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
+
+        garage2 = Image.open("garage 2.jpg").resize((200, 150))
+        garage2_img = ImageTk.PhotoImage(garage2)
+
+        garage3 = Image.open("garage 3.jpg").resize((200, 150))
+        garage3_img = ImageTk.PhotoImage(garage3)
+
+        garage_img = [garage1_img, garage2_img, garage3_img]
+
+        i = 1
+        j = 2
+
+        for img in garage_img:
+            garage = Label(self, image=img)
+            garage.image = img
+            garage.grid(row=i, column=0, pady=15, sticky="w")
+            i = i+2
+        for parking in results:
+            Label(self, text=parking).grid(row=j, column=0, sticky="w")
+            j = j+2
+
+
+        # Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, pady=15, sticky="w")
 
 
 # Renter - Searching Page
@@ -259,7 +296,7 @@ class AddParkingPage(Frame):
         Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=6, column=1, pady=15)
 
         Button(self, text="Add", font=TextFont, bg="white").grid(row=7, column=0, pady=15)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=2, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=7, column=2, pady=15, sticky="w")
 
 
 # Reservation page
@@ -339,8 +376,9 @@ class AcctUpdatePage(Frame):
         account_entry = Entry(self, font=TextFont)
         account_entry.grid(row=10, column=1, sticky="w")
 
-        logoff_button = Button(self, text="Confirm Update", font=TextFont, bg="white", command=update)
-        logoff_button.grid(row=11, column=1, columnspan=2)
+        Button(self, text="Confirm Update", font=TextFont, bg="white", command=update).grid(row=11, column=0)
+
+        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).grid(row=11, column=1, padx=10, pady=10)
 
         # Getter
         firstname = fn_entry.get()
