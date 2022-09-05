@@ -8,7 +8,7 @@ class ParkingSpot(models.Model):
     city = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=100, blank=True, null=True)
-    vehicle_type = models.CharField(max_length=100, blank=True, null=True) #Truck, SUV, Car
+    vehicle_type = models.CharField(max_length=100, blank=True, null=True) #Compact, SUV, Standard, and Oversized
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     available = models.BooleanField(default=False)

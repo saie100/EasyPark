@@ -1,3 +1,4 @@
+import re
 from tkinter import *
 
 from tkinter import messagebox
@@ -5,6 +6,7 @@ from PIL import ImageTk, Image
 from tkcalendar import DateEntry
 from verify_email import verify_email
 from tkinter import filedialog
+import datetime
 
 import requests
 
@@ -53,12 +55,19 @@ class LoginPage(Frame):
 
             if account == "" or password == "":
                 messagebox.showerror('Error', message="Email and Password Can\'t be blank")
-            elif account == "cse682" and password == "cse682":
-                email_entry.delete(0, 'end')
-                pw_entry.delete(0, 'end')
+            
+            url = 'http://127.0.0.1:8000/users/signin/'
+                
+            data = {'email': email_entry.get(), 'password' : pw_entry.get()}
+            res = requests.post(url, data)
+            print(res.json())
+
+            if(res.json() == "User Logged In"):
                 controller.show_frame(UserPage)
+            elif(res.json() == "Wrong Credentials"):
+                messagebox.showerror('Error', message="Incorrect Credentials")
             else:
-                messagebox.showerror('Error', message="Incorrect Account and Password")
+                messagebox.showerror('Error', message="Something Went Wrong With Backend Server!")
 
         # Title - Easy Park
         title_label = Label(self, text="Easy Park", font=TitleFont)
@@ -97,6 +106,17 @@ class UserPage(Frame):
         Frame.__init__(self, parent)
         label = Label(self, text="Welcome", font=TitleFont)
         label.pack(padx=5, pady=5)
+        def logoff():
+            url = 'http://127.0.0.1:8000/users/signout/'    
+            data = {}
+            res = requests.post(url, data)
+            
+            if(res.json == "Logged out"):
+                controller.show_frame(LoginPage) 
+            else:
+                print("Something went wrong in the backend")
+
+            
         # Renter interface
         renter_button = Button(self, text="Renter", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage))
         renter_button.pack(padx=5, pady=20)
@@ -116,7 +136,7 @@ class UserPage(Frame):
         delete_button = Button(self, text="Monthly Report", bg="white", font=TextFont, command=lambda: controller.show_frame(ReportPage))
         delete_button.pack(padx=5, pady=20)
         # Log Off
-        logoff_button = Button(self, text="Log Off", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage))
+        logoff_button = Button(self, text="Log Off", font=TextFont, bg="white", command=logoff) 
         logoff_button.pack(padx=5, pady=20)
 
 
@@ -179,16 +199,17 @@ class SpotResPage(Frame):
         label.grid(row=0, column=0, padx=10, pady=15)
 
         results = ["parking 1", "parking 2", "parking 3"]
-        garage1 = Image.open("garage 1.jpg").resize((200, 150))
-        garage1_img = ImageTk.PhotoImage(garage1)
+        #garage1 = Image.open("garage 1.jpg").resize((200, 150))
+        #garage1_img = ImageTk.PhotoImage(garage1)
 
-        garage2 = Image.open("garage 2.jpg").resize((200, 150))
-        garage2_img = ImageTk.PhotoImage(garage2)
+        #garage2 = Image.open("garage 2.jpg").resize((200, 150))
+        #garage2_img = ImageTk.PhotoImage(garage2)
 
-        garage3 = Image.open("garage 3.jpg").resize((200, 150))
-        garage3_img = ImageTk.PhotoImage(garage3)
+        #garage3 = Image.open("garage 3.jpg").resize((200, 150))
+        #garage3_img = ImageTk.PhotoImage(garage3)
 
-        garage_img = [garage1_img, garage2_img, garage3_img]
+        #garage_img = [garage1_img, garage2_img, garage3_img]
+        garage_img = []
 
         i = 1
         j = 2
@@ -428,7 +449,8 @@ class SignUpPage(Frame):
         label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nw")
 
         def verifyAcc():
-            if firstname == "" or lastname == "" or email == "" or phone == "" or password == "" or confirm == "" or bank == "" or routing == "" or account == "":
+
+            if not fn_entry.get() or not ln_entry.get() or not email_entry.get() or not phone_entry.get() or not pw_entry.get() or not confirm_entry.get() or not bank_entry.get() or not routing_entry.get() or not account_entry.get(): 
                 messagebox.showerror('Error', message='Please fill in all info!')
                 if password != confirm:
                     messagebox.showerror('Error', message='Password and confirm password must be the same!')
@@ -437,7 +459,22 @@ class SignUpPage(Frame):
                         if not email_verify:
                             messagebox.showerror('Error', message='Email enter is increase!')
             else:
-                messagebox.showinfo(title="Success", message="Successfully Signed Up")
+
+                url = 'http://127.0.0.1:8000/users/signup/'
+                
+                data = {'first_name' : fn_entry.get(), 'last_name': ln_entry.get(), 'email': email_entry.get(), 'password' : pw_entry.get()}
+                res = requests.post(url, data)
+                #print(res)
+                #print(res.json)
+                #print(res.text)
+                
+                
+                if(res.json() == "New User Created"):
+                    messagebox.showinfo(title="Success", message="Successfully Signed Up")
+                    controller.show_frame(LoginPage) 
+                else:
+                    print("Something went wrong in the backend")
+
 
         Label(self, text="*Please fill in this form to create an account:", font=("Times", 15)).grid(row=1, column=0, columnspan=2, pady=5, sticky="nw")
 
