@@ -193,38 +193,44 @@ class RenterPage(Frame):
 
 # Renter - Searching Page
 class SearchingPage(Frame):
-    def __init__(self, parent, controller):
+       def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Available Parking", font=TitleFont)
-        label.grid(row=0, column=0, padx=10, pady=15)
+        label.grid(row=0, column=0, columnspan= 2, pady=15)
 
-        results = ["parking 1", "parking 2", "parking 3"]
-        #garage1 = Image.open("garage 1.jpg").resize((200, 150))
-        #garage1_img = ImageTk.PhotoImage(garage1)
+        def reserve():
+            messagebox.showinfo(title="Success", message="Your parking spot is successfully reserved.")
+            controller.show_frame(UserPage)
 
-        #garage2 = Image.open("garage 2.jpg").resize((200, 150))
-        #garage2_img = ImageTk.PhotoImage(garage2)
+        address1 = "Lyon St, San Francisco, CA 94123"
+        address2 = "Lombard St, San Francisco, CA 94123"
 
-        #garage3 = Image.open("garage 3.jpg").resize((200, 150))
-        #garage3_img = ImageTk.PhotoImage(garage3)
+        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
+        availabletime2 = "09/04/2022 12:00 - 09/10/2022 12:00"
 
-        #garage_img = [garage1_img, garage2_img, garage3_img]
-        garage_img = []
+        garage1 = Image.open("no image.jpg").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
 
-        i = 1
-        j = 2
+        garage2 = Image.open("no image.jpg").resize((200, 150))
+        garage2_img = ImageTk.PhotoImage(garage2)
 
-        for img in garage_img:
-            garage = Label(self, image=img)
-            garage.image = img
-            garage.grid(row=i, column=0, pady=15, sticky="w")
-            i = i+2
-        for parking in results:
-            Label(self, text=parking).grid(row=j, column=0, sticky="w")
-            j = j+2
+        # Parking Garage 1
+        garage = Label(self, image=garage1_img)
+        garage.image = garage1_img
+        garage.grid(row=1, column=0, pady=15)
+        reserve1 = Button(self, text="Reserve", command=reserve)
+        reserve1.grid(row=1, column=1, pady=15, sticky="e")
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, sticky="w")
 
+        # Parking Garage 2
+        garage = Label(self, image=garage2_img)
+        garage.image = garage2_img
+        garage.grid(row=3, column=0, pady=15)
+        reserve2 = Button(self, text="Reserve", command=reserve)
+        reserve2.grid(row=3, column=1, pady=15, sticky="e")
+        Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2).grid(row=4, column=0, sticky="w")
 
-        # Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, pady=15, sticky="w")
 
 
 # Renter - Searching Page
@@ -449,8 +455,7 @@ class ReportPage(Frame):
         label = Label(self, text="Please check back next month!", font=TextFont)
         label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
-        logoff_button = Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage))
-        logoff_button.grid(row=3, column=0, pady=20)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=3, column=0, pady=20)
 
 
 # Sign Up Page
