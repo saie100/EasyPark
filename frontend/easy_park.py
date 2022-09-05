@@ -63,6 +63,8 @@ class LoginPage(Frame):
             print(res.json())
 
             if(res.json() == "User Logged In"):
+                email_entry.delete(0, 'end')
+                pw_entry.delete(0, 'end')
                 controller.show_frame(UserPage)
             elif(res.json() == "Wrong Credentials"):
                 messagebox.showerror('Error', message="Incorrect Credentials")
