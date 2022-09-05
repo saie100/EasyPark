@@ -31,7 +31,8 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage):
+        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, 
+                  AcctDeletePage, ReportPage, SearchingPage, ParkingSpotPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -232,7 +233,7 @@ class SearchingPage(Frame):
         reserve2.grid(row=3, column=1, pady=15, sticky="e")
         Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2).grid(row=4, column=0, sticky="w")
 
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, columnspan=2, pady=15, sticky="w")
 
 
 # Renter - Searching Page
@@ -341,18 +342,63 @@ class AddParkingPage(Frame):
 
         Button(self, text="Add", font=TextFont, bg="white", command=added).grid(row=11, column=2, pady=15)
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=11, column=0, pady=15, sticky="w")
+        
+# Client - Parking Spot
+class ParkingSpotPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Parking Spot", font=TitleFont)
+        label.grid(row=0, column=0, columnspan=2)
 
+        address1 = "Lyon St, San Francisco, CA 94123"
+        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
 
+        garage1 = Image.open("no image.jpg").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
+
+        garage = Label(self, image=garage1_img)
+        garage.image = garage1_img
+        garage.grid(row=1, column=0, pady=15, columnspan=2)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
+
+        Button(self, text="edit", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
+        Button(self, text="delete", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=4, column=0, pady=15, columnspan=2)
+
+        
 # Reservation page
 class ReservationPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Reservation", font=TitleFont)
-        label.grid(row=0, column=0, padx=10, pady=10)
+        label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).grid(row=1, column=0, padx=10, pady=10)
+        address1 = "Lyon St, San Francisco, CA 94123"
+        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
 
+        garage1 = Image.open("no image.jpg").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
 
+        garage = Label(self, image=garage1_img)
+        garage.image = garage1_img
+        garage.grid(row=1, column=0, pady=15, columnspan=2)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
+
+        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=4, column=0, pady=15, columnspan=2)
+
+        
+# Client - Parking Spot
+class ParkingSpotPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Find Parking Spot", font=TitleFont)
+        label.pack(pady=20)
+        
+        
 # Update Account page
 class AcctUpdatePage(Frame):
     def __init__(self, parent, controller):
