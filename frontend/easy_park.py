@@ -306,38 +306,41 @@ class AddParkingPage(Frame):
         end_time.grid(row=2, column=2)
 
         # Location - Street, City, State, Zipcode
-        Label(self, text="Street: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
-        street_entry = Entry(self, font=TextFont)
+        Label(self, text="House #: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
+        house_entry = Entry(self, font=TextFont)
         street_entry.grid(row=3, column=1)
-        Label(self, text="City: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
+        Label(self, text="Street: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
+        street_entry = Entry(self, font=TextFont)
+        street_entry.grid(row=4, column=1)
+        Label(self, text="City: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
         city_entry = Entry(self, font=TextFont)
-        city_entry.grid(row=4, column=1)
-        Label(self, text="State: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
+        city_entry.grid(row=5, column=1)
+        Label(self, text="State: ", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
         state_entry = Entry(self, font=TextFont)
-        state_entry.grid(row=5, column=1)
-        Label(self, text="Zip Code: ", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
+        state_entry.grid(row=6, column=1)
+        Label(self, text="Zip Code: ", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
         zipcode_entry = Entry(self, font=TextFont)
-        zipcode_entry.grid(row=6, column=1)
+        zipcode_entry.grid(row=7, column=1)
 
         # Vehicle Type
-        Label(self, text="Vehicle Type Fit In Garage: ", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
+        Label(self, text="Vehicle Type Fit In Garage: ", font=TextFont).grid(row=8, column=0, pady=15, sticky="e")
         v_type.set("Compact")
         vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
-        vehicle_type1.grid(row=7, column=1, sticky="w")
+        vehicle_type1.grid(row=8, column=1, sticky="w")
         vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
-        vehicle_type2.grid(row=7, column=2, sticky="w")
+        vehicle_type2.grid(row=8, column=2, sticky="w")
         vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
-        vehicle_type3.grid(row=8, column=1, pady=5, sticky="w")
+        vehicle_type3.grid(row=9, column=1, pady=5, sticky="w")
         vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
-        vehicle_type4.grid(row=8, column=2, sticky="w")
+        vehicle_type4.grid(row=9, column=2, sticky="w")
 
         # Upload image
-        Label(self, text="Image: ", font=TextFont).grid(row=9, column=0, pady=15, sticky="e")
+        Label(self, text="Image: ", font=TextFont).grid(row=10, column=0, pady=15, sticky="e")
         # Button(self, text="image path", command=open_img).grid(row=7, column=1, pady=15)
-        Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=9, column=1, pady=15)
+        Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=10, column=1, pady=15)
 
-        Button(self, text="Add", font=TextFont, bg="white", command=added).grid(row=10, column=2, pady=15)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=10, column=0, pady=15, sticky="w")
+        Button(self, text="Add", font=TextFont, bg="white", command=added).grid(row=11, column=2, pady=15)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=11, column=0, pady=15, sticky="w")
 
 
 # Reservation page
