@@ -240,6 +240,8 @@ class SearchingPage(Frame):
         #garage2 = Image.open("no image.jpg").resize((200, 150))
         #garage2_img = ImageTk.PhotoImage(garage2)
 
+        i = 0
+        j = 0
         for img in garage_img:
             garage = Label(self, image=img)
             garage.image = img
@@ -347,9 +349,9 @@ class AddParkingPage(Frame):
         end_time.grid(row=2, column=2)
 
         # Location - Street, City, State, Zipcode
-        Label(self, text="House #: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
-        house_entry = Entry(self, font=TextFont)
-        street_entry.grid(row=3, column=1)
+        #Label(self, text="House #: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
+        #house_entry = Entry(self, font=TextFont)
+        #house_entry.grid(row=3, column=1)
         Label(self, text="Street: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
         street_entry = Entry(self, font=TextFont)
         street_entry.grid(row=4, column=1)
@@ -393,12 +395,12 @@ class ParkingSpotPage(Frame):
         address1 = "Lyon St, San Francisco, CA 94123"
         availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
 
-        garage1 = Image.open("no image.jpg").resize((200, 150))
-        garage1_img = ImageTk.PhotoImage(garage1)
+        #garage1 = Image.open("no image.jpg").resize((200, 150))
+        #garage1_img = ImageTk.PhotoImage(garage1)
 
-        garage = Label(self, image=garage1_img)
-        garage.image = garage1_img
-        garage.grid(row=1, column=0, pady=15, columnspan=2)
+        #garage = Label(self, image=garage1_img)
+        #garage.image = garage1_img
+        #garage.grid(row=1, column=0, pady=15, columnspan=2)
         Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
 
         Button(self, text="edit", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
@@ -417,12 +419,12 @@ class ReservationPage(Frame):
         address1 = "Lyon St, San Francisco, CA 94123"
         availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
 
-        garage1 = Image.open("no image.jpg").resize((200, 150))
-        garage1_img = ImageTk.PhotoImage(garage1)
+        #garage1 = Image.open("no image.jpg").resize((200, 150))
+        #garage1_img = ImageTk.PhotoImage(garage1)
 
-        garage = Label(self, image=garage1_img)
-        garage.image = garage1_img
-        garage.grid(row=1, column=0, pady=15, columnspan=2)
+        #garage = Label(self, image=garage1_img)
+        #garage.image = garage1_img
+        #garage.grid(row=1, column=0, pady=15, columnspan=2)
         Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
 
         Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
