@@ -34,7 +34,8 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage):
+        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, 
+                  AcctDeletePage, ReportPage, SearchingPage, ParkingSpotPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -195,7 +196,7 @@ class RenterPage(Frame):
             res = session.get(baseURL + 'parking/')
 
             if(len(res.json()) == 1 ):
-                controller.frames[SearchingPage].spot_label1.config(text=res.json()[0]['street_address'])
+                controller.frames[SearchingPage].spot_label1.config(text="street_address: "+ res.json()[0]['street_address']+"\n city: " + res.json()[0]['city']+"\n state: " + res.json()[0]['state'] + "\n zipcode: " + res.json()[0]['zip_code'] )
                 controller.show_frame(SearchingPage)
             elif( len(res.json()) == 2):
                 controller.frames[SearchingPage].spot_label1.config(text=res.json()[0]['street_address'])
@@ -211,10 +212,10 @@ class RenterPage(Frame):
 
 # Renter - Searching Page
 class SearchingPage(Frame):
-    def __init__(self, parent, controller):
+       def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Available Parking", font=TitleFont)
-        label.grid(row=0, column=0, padx=10, pady=15)
+        label.grid(row=0, column=0, columnspan= 2, pady=15)
 
         
         self.spot_label1 = Label(self, bg="yellow", bd=5, padx=10, pady=10, text="N/A", font=TitleFont)
@@ -225,17 +226,19 @@ class SearchingPage(Frame):
         #garage1 = Image.open("garage 1.jpg").resize((200, 150))
         #garage1_img = ImageTk.PhotoImage(garage1)
 
-        #garage2 = Image.open("garage 2.jpg").resize((200, 150))
-        #garage2_img = ImageTk.PhotoImage(garage2)
-
-        #garage3 = Image.open("garage 3.jpg").resize((200, 150))
-        #garage3_img = ImageTk.PhotoImage(garage3)
-
-        #garage_img = [garage1_img, garage2_img, garage3_img]
         garage_img = []
 
-        i = 1
-        j = 2
+        #address1 = "Lyon St, San Francisco, CA 94123"
+        #address2 = "Lombard St, San Francisco, CA 94123"
+
+        #availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
+        #availabletime2 = "09/04/2022 12:00 - 09/10/2022 12:00"
+
+        #garage1 = Image.open("no image.jpg").resize((200, 150))
+        #garage1_img = ImageTk.PhotoImage(garage1)
+
+        #garage2 = Image.open("no image.jpg").resize((200, 150))
+        #garage2_img = ImageTk.PhotoImage(garage2)
 
         for img in garage_img:
             garage = Label(self, image=img)
@@ -246,8 +249,16 @@ class SearchingPage(Frame):
             parking.grid(row=j, column=0, sticky="w")
             j = j+2
 
+        # Parking Garage 2
+        #garage = Label(self, image=garage2_img)
+        #garage.image = garage2_img
+        #garage.grid(row=3, column=0, pady=15)
+        #reserve2 = Button(self, text="Reserve", command=reserve)
+        #reserve2.grid(row=3, column=1, pady=15, sticky="e")
+        
+        #Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2).grid(row=4, column=0, sticky="w")
 
-        # Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, columnspan=2, pady=15, sticky="w")
 
 
 # Renter - Searching Page
@@ -336,50 +347,98 @@ class AddParkingPage(Frame):
         end_time.grid(row=2, column=2)
 
         # Location - Street, City, State, Zipcode
-        Label(self, text="Street: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
-        street_entry = Entry(self, font=TextFont)
+        Label(self, text="House #: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
+        house_entry = Entry(self, font=TextFont)
         street_entry.grid(row=3, column=1)
-        Label(self, text="City: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
+        Label(self, text="Street: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
+        street_entry = Entry(self, font=TextFont)
+        street_entry.grid(row=4, column=1)
+        Label(self, text="City: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
         city_entry = Entry(self, font=TextFont)
-        city_entry.grid(row=4, column=1)
-        Label(self, text="State: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
+        city_entry.grid(row=5, column=1)
+        Label(self, text="State: ", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
         state_entry = Entry(self, font=TextFont)
-        state_entry.grid(row=5, column=1)
-        Label(self, text="Zip Code: ", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
+        state_entry.grid(row=6, column=1)
+        Label(self, text="Zip Code: ", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
         zipcode_entry = Entry(self, font=TextFont)
-        zipcode_entry.grid(row=6, column=1)
+        zipcode_entry.grid(row=7, column=1)
 
         # Vehicle Type
-        Label(self, text="Vehicle Type Fit In Garage: ", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
+        Label(self, text="Vehicle Type Fit In Garage: ", font=TextFont).grid(row=8, column=0, pady=15, sticky="e")
         v_type.set("Compact")
         vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
-        vehicle_type1.grid(row=7, column=1, sticky="w")
+        vehicle_type1.grid(row=8, column=1, sticky="w")
         vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
-        vehicle_type2.grid(row=7, column=2, sticky="w")
+        vehicle_type2.grid(row=8, column=2, sticky="w")
         vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
-        vehicle_type3.grid(row=8, column=1, pady=5, sticky="w")
+        vehicle_type3.grid(row=9, column=1, pady=5, sticky="w")
         vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
-        vehicle_type4.grid(row=8, column=2, sticky="w")
+        vehicle_type4.grid(row=9, column=2, sticky="w")
 
         # Upload image
-        Label(self, text="Image: ", font=TextFont).grid(row=9, column=0, pady=15, sticky="e")
+        Label(self, text="Image: ", font=TextFont).grid(row=10, column=0, pady=15, sticky="e")
         # Button(self, text="image path", command=open_img).grid(row=7, column=1, pady=15)
-        Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=9, column=1, pady=15)
+        Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=10, column=1, pady=15)
 
-        Button(self, text="Add", font=TextFont, bg="white", command=added).grid(row=10, column=2, pady=15)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=10, column=0, pady=15, sticky="w")
+        Button(self, text="Add", font=TextFont, bg="white", command=added).grid(row=11, column=2, pady=15)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=11, column=0, pady=15, sticky="w")
+        
+# Client - Parking Spot
+class ParkingSpotPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Parking Spot", font=TitleFont)
+        label.grid(row=0, column=0, columnspan=2)
 
+        address1 = "Lyon St, San Francisco, CA 94123"
+        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
 
+        garage1 = Image.open("no image.jpg").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
+
+        garage = Label(self, image=garage1_img)
+        garage.image = garage1_img
+        garage.grid(row=1, column=0, pady=15, columnspan=2)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
+
+        Button(self, text="edit", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
+        Button(self, text="delete", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=4, column=0, pady=15, columnspan=2)
+
+        
 # Reservation page
 class ReservationPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Reservation", font=TitleFont)
-        label.grid(row=0, column=0, padx=10, pady=10)
+        label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).grid(row=1, column=0, padx=10, pady=10)
+        address1 = "Lyon St, San Francisco, CA 94123"
+        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
 
+        garage1 = Image.open("no image.jpg").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
 
+        garage = Label(self, image=garage1_img)
+        garage.image = garage1_img
+        garage.grid(row=1, column=0, pady=15, columnspan=2)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
+
+        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=4, column=0, pady=15, columnspan=2)
+
+        
+# Client - Parking Spot
+class ParkingSpotPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Find Parking Spot", font=TitleFont)
+        label.pack(pady=20)
+        
+        
 # Update Account page
 class AcctUpdatePage(Frame):
     def __init__(self, parent, controller):
@@ -487,8 +546,7 @@ class ReportPage(Frame):
         label = Label(self, text="Please check back next month!", font=TextFont)
         label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
-        logoff_button = Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage))
-        logoff_button.grid(row=3, column=0, pady=20)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=3, column=0, pady=20)
 
 
 # Sign Up Page
