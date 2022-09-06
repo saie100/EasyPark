@@ -2,14 +2,17 @@ import re
 from tkinter import *
 
 from tkinter import messagebox
+from turtle import update
 from PIL import ImageTk, Image
+import click
 from tkcalendar import DateEntry
 from verify_email import verify_email
 from tkinter import filedialog
 import datetime
-
 import requests
 
+session = requests.Session() # Creates a session with the backend server
+baseURL = 'http://127.0.0.1:8000/' # Base url of the backend server
 
 TitleFont = ("Comic Sans MS", 40, "bold")
 TextFont = ("Times", 12)
@@ -38,6 +41,7 @@ class EasyPark(Tk):
 
         self.show_frame(LoginPage)
 
+
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
@@ -55,19 +59,19 @@ class LoginPage(Frame):
 
             if account == "" or password == "":
                 messagebox.showerror('Error', message="Email and Password Can\'t be blank")
-            
-            url = 'http://127.0.0.1:8000/users/signin/'
                 
             data = {'email': email_entry.get(), 'password' : pw_entry.get()}
-            res = requests.post(url, data)
-            print(res.json())
+            res = session.post(baseURL + 'users/signin/', data) # POST Request to authenticate user before logging in
 
             if(res.json() == "User Logged In"):
-                controller.show_frame(UserPage)
+                res = session.get(baseURL + 'users/')  # GET Request to retrieve user info after authentication
+                controller.frames[UserPage].label.config(text="Welcome " + res.json()['first_name'] + "!") # Update the Welcome Label in UserPage with the user's name
+                controller.show_frame(UserPage) # Display UserPage
+
             elif(res.json() == "Wrong Credentials"):
                 messagebox.showerror('Error', message="Incorrect Credentials")
             else:
-                messagebox.showerror('Error', message="Something Went Wrong With Backend Server!")
+                messagebox.showerror('Error', message="Something went wrong with backend server!")
 
         # Title - Easy Park
         title_label = Label(self, text="Easy Park", font=TitleFont)
@@ -103,15 +107,15 @@ class LoginPage(Frame):
 # User Page - after signing in
 class UserPage(Frame):
     def __init__(self, parent, controller):
+        
         Frame.__init__(self, parent)
-        label = Label(self, text="Welcome", font=TitleFont)
-        label.pack(padx=5, pady=5)
+        self.label = Label(self, text="Welcome!", font=TitleFont)
+        self.label.pack(padx=5, pady=5)
+        
         def logoff():
-            url = 'http://127.0.0.1:8000/users/signout/'    
-            data = {}
-            res = requests.post(url, data)
-            
-            if(res.json == "Logged out"):
+            res = session.get(baseURL + 'users/signout/')
+
+            if(res.json() == "Logged out"):
                 controller.show_frame(LoginPage) 
             else:
                 print("Something went wrong in the backend")
@@ -187,7 +191,21 @@ class RenterPage(Frame):
         vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
         vehicle_type4.grid(row=6, column=2, sticky="w")
 
-        Button(self, text="Search", font=TextFont, bg="white", command=lambda: controller.show_frame(SpotResPage)).grid(row=7, column=0, pady=15, sticky="e")
+        def loadSearchPage():
+            res = session.get(baseURL + 'parking/')
+
+            if(len(res.json()) == 1 ):
+                controller.frames[SearchingPage].spot_label1.config(text=res.json()[0]['street_address'])
+                controller.show_frame(SearchingPage)
+            elif( len(res.json()) == 2):
+                controller.frames[SearchingPage].spot_label1.config(text=res.json()[0]['street_address'])
+                controller.frames[SearchingPage].spot_label2.config(text=res.json()[1]['street_address'])
+                controller.show_frame(SearchingPage)
+            else:
+                messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
+
+
+        Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=7, column=0, pady=15, sticky="e")
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=2, pady=15, sticky="w")
 
 
@@ -198,7 +216,12 @@ class SearchingPage(Frame):
         label = Label(self, text="Available Parking", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=15)
 
-        results = ["parking 1", "parking 2", "parking 3"]
+        
+        self.spot_label1 = Label(self, bg="yellow", bd=5, padx=10, pady=10, text="N/A", font=TitleFont)
+        self.spot_label2 = Label(self, bg="yellow", bd=5, padx=10, pady=10, text="N/A", font=TitleFont)
+        
+        self.results = [self.spot_label1, self.spot_label2]
+        
         #garage1 = Image.open("garage 1.jpg").resize((200, 150))
         #garage1_img = ImageTk.PhotoImage(garage1)
 
@@ -219,8 +242,8 @@ class SearchingPage(Frame):
             garage.image = img
             garage.grid(row=i, column=0, pady=15, sticky="w")
             i = i+2
-        for parking in results:
-            Label(self, text=parking).grid(row=j, column=0, sticky="w")
+        for parking in self.results:
+            parking.grid(row=j, column=0, sticky="w")
             j = j+2
 
 
@@ -228,11 +251,11 @@ class SearchingPage(Frame):
 
 
 # Renter - Searching Page
-class SearchingPage(Frame):
+"""class SearchingPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Find Parking Spot", font=TitleFont)
-        label.grid(row=0, column=0, columnspan=3, padx=10, pady=15)
+        label.grid(row=0, column=0, columnspan=3, padx=10, pady=15)"""
 
 
 # Client Page
@@ -258,14 +281,29 @@ class AddParkingPage(Frame):
                        "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
                        "20:00", "21:00", "22:00", "23:00"]
 
-        clicked = StringVar()
-        clicked.set(time_option[0])
+        clicked_start = StringVar()
+        clicked_start.set(time_option[0])
+        
+        clicked_end = StringVar()
+        clicked_end.set(time_option[0])
+
 
         filename = StringVar()
 
         def added():
-            messagebox.showinfo(messagebox.showinfo(title="Success", message="Successfully Added Parking Sot"))
-            controller.show_frame(ClientPage)
+            # When doing post requests we need to retrieve the csrftoken with a GET request then we can do a POST request
+
+            res = session.get(baseURL + "parking/") # Retriveing csrftoken 
+            csrftoken = res.cookies['csrftoken']
+            # using csrftoken in POST request
+            data = {'csrfmiddlewaretoken': csrftoken, 'street_address' : street_entry.get().lower(), 'city' : city_entry.get().lower(), 'state' : state_entry.get().lower(), 'zip_code' : zipcode_entry.get(), 'vehicle_type' : v_type.get().lower(), 'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),  'end_date' : end_cal.get_date(), 'end_time': clicked_end.get()}
+            res = session.post(baseURL + "parking/", data=data)
+            if(res.json() == "New Spot Created"):
+                messagebox.showinfo(messagebox.showinfo(title="Success", message="Successfully Added Parking Sot"))
+                controller.show_frame(ClientPage)
+            else:
+                messagebox.showerror("Error", message="Something went wrong with backend server!")
+
 
         def save_png():
             try:
@@ -287,14 +325,14 @@ class AddParkingPage(Frame):
         Label(self, text="Start Day & Time:", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
         start_cal = DateEntry(self, selectmode='day')
         start_cal.grid(row=1, column=1)
-        start_time = OptionMenu(self, clicked, *time_option)
+        start_time = OptionMenu(self, clicked_start, *time_option)
         start_time.grid(row=1, column=2)
 
         # End Date & Time
         Label(self, text="End Day & Time:", font=TextFont).grid(row=2, column=0, pady=15, sticky="e")
         end_cal = DateEntry(self, selectmode='day')
         end_cal.grid(row=2, column=1)
-        end_time = OptionMenu(self, clicked, *time_option)
+        end_time = OptionMenu(self, clicked_end, *time_option)
         end_time.grid(row=2, column=2)
 
         # Location - Street, City, State, Zipcode
@@ -471,15 +509,9 @@ class SignUpPage(Frame):
                         if not email_verify:
                             messagebox.showerror('Error', message='Email enter is increase!')
             else:
-
-                url = 'http://127.0.0.1:8000/users/signup/'
                 
                 data = {'first_name' : fn_entry.get(), 'last_name': ln_entry.get(), 'email': email_entry.get(), 'password' : pw_entry.get()}
-                res = requests.post(url, data)
-                #print(res)
-                #print(res.json)
-                #print(res.text)
-                
+                res = session.post(baseURL + 'users/signup/', data)
                 
                 if(res.json() == "New User Created"):
                     messagebox.showinfo(title="Success", message="Successfully Signed Up")

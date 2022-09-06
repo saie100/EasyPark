@@ -1,5 +1,5 @@
 from hashlib import new
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from .models import User
@@ -11,27 +11,14 @@ from django.contrib.auth import authenticate, login, logout
 class UserView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        """queryedUser = request.GET.get('email', '')
 
-        if(User.objects.filter(email=queryedUser).exists()):
-            self.queryset = User.objects.get(email=queryedUser)
-            return Response(self.serializer_class(self.queryset, many=False).data)
+        self.queryset = User.objects.get(id=request.user.id)
+        return Response(self.serializer_class(self.queryset, many=False).data)
 
-        elif(queryedUser != ''):
-            return Response("User does not exist")
-
-        else:        
-            self.queryset = User.objects.all()
-            return Response(self.serializer_class(self.queryset, many=True).data)
-"""      
-        self.queryset = User.objects.all()
-        print(request.user)
-        print(request)
-        return Response(self.serializer_class(self.queryset, many=True).data)
-
+      
 class SignUp(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -56,7 +43,7 @@ class SignIn(viewsets.ModelViewSet):
 
     def create(self, request):
         
-        user = authenticate(request=request, username=request.data['email'], password=request.data['password'])
+        user = authenticate(request=request, username=request.data['email'], password=request.data['password'])        
 
         if(user is not None):
             login(request, user)
@@ -72,11 +59,11 @@ class SignOut(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     
     def list(self, request):
+        
         logout(request)
-        print("Logged Off")
-        resp = Response("Logged out")
-        return resp
-
+        
+        return Response("Logged out")
+        
 
 
 
