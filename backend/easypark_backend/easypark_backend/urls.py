@@ -19,6 +19,8 @@ from django.urls import path, include, re_path
 from .views import index
 from django.views.generic import TemplateView
 from rest_framework import routers
+from django.conf.urls.static import static
+from django.conf import settings
 
 router = routers.DefaultRouter()
 
@@ -28,5 +30,5 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('parking/', include('parking_spot.urls')),
     path('payment/', include('payment_interface.urls')),
-    ]
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

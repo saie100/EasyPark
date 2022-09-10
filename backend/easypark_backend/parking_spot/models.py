@@ -1,3 +1,4 @@
+from distutils.command.upload import upload
 from django.db import models
 from users.models import User
 
@@ -11,7 +12,7 @@ class ParkingSpot(models.Model):
     vehicle_type = models.CharField(max_length=100, blank=True, null=True) #Compact, SUV, Standard, and Oversized
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    image = models.ImageField(upload_to='parking_spot_images')
+    image = models.ImageField(upload_to='images/garage/')
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     

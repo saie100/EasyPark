@@ -1,10 +1,8 @@
-import re
 from tkinter import *
 
 from tkinter import messagebox
 from turtle import update
 from PIL import ImageTk, Image
-import click
 from tkcalendar import DateEntry
 from verify_email import verify_email
 from tkinter import filedialog
@@ -196,12 +194,25 @@ class RenterPage(Frame):
             res = session.get(baseURL + 'parking/')
 
             if(len(res.json()) == 1 ):
-                controller.frames[SearchingPage].spot_label1.config(text="street_address: "+ res.json()[0]['street_address']+"\n city: " + res.json()[0]['city']+"\n state: " + res.json()[0]['state'] + "\n zipcode: " + res.json()[0]['zip_code'] )
+                controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date']  )
+
+                if(res.json()[0]['image'] != None):
+                    controller.frames[SearchingPage].garage1.config(image=res.json()[0]['image'])
+
                 controller.show_frame(SearchingPage)
             elif( len(res.json()) == 2):
-                controller.frames[SearchingPage].spot_label1.config(text=res.json()[0]['street_address'])
-                controller.frames[SearchingPage].spot_label2.config(text=res.json()[1]['street_address'])
+                controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date']  )
+                controller.frames[SearchingPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code'] 
+                + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date']  )
                 controller.show_frame(SearchingPage)
+
+                if(res.json()[0]['image'] != None):
+                    controller.frames[SearchingPage].garage1.config(image=res.json()[0]['image'])
+                if(res.json()[1]['image'] != None):
+                    controller.frames[SearchingPage].garage2.config(image=res.json()[1]['image'])
+                 
             else:
                 messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
 
@@ -218,50 +229,41 @@ class SearchingPage(Frame):
         label.grid(row=0, column=0, columnspan= 2, pady=15)
 
         
-        self.spot_label1 = Label(self, bg="yellow", bd=5, padx=10, pady=10, text="N/A", font=TitleFont)
-        self.spot_label2 = Label(self, bg="yellow", bd=5, padx=10, pady=10, text="N/A", font=TitleFont)
-        
-        self.results = [self.spot_label1, self.spot_label2]
-        
-        #garage1 = Image.open("garage 1.jpg").resize((200, 150))
-        #garage1_img = ImageTk.PhotoImage(garage1)
+        def reserve():
+            messagebox.showinfo(title="Success", message="Your parking spot is successfully reserved.")
+            controller.show_frame(UserPage)
 
-        garage_img = []
+        address1 = "Lyon St, San Francisco, CA 94123"
+        address2 = "Lombard St, San Francisco, CA 94123"
 
-        #address1 = "Lyon St, San Francisco, CA 94123"
-        #address2 = "Lombard St, San Francisco, CA 94123"
+        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
+        availabletime2 = "09/04/2022 12:00 - 09/10/2022 12:00"
 
-        #availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
-        #availabletime2 = "09/04/2022 12:00 - 09/10/2022 12:00"
+        garage1 = Image.open("no_image.png").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
 
-        #garage1 = Image.open("no image.jpg").resize((200, 150))
-        #garage1_img = ImageTk.PhotoImage(garage1)
+        garage2 = Image.open("no_image.png").resize((200, 150))
+        garage2_img = ImageTk.PhotoImage(garage2)
 
-        #garage2 = Image.open("no image.jpg").resize((200, 150))
-        #garage2_img = ImageTk.PhotoImage(garage2)
-
-        i = 0
-        j = 0
-        for img in garage_img:
-            garage = Label(self, image=img)
-            garage.image = img
-            garage.grid(row=i, column=0, pady=15, sticky="w")
-            i = i+2
-        for parking in self.results:
-            parking.grid(row=j, column=0, sticky="w")
-            j = j+2
+        # Parking Garage 1
+        self.garage1 = Label(self, image=garage1_img)
+        self.garage1.image = garage1_img
+        self.garage1.grid(row=1, column=0, pady=15)
+        reserve1 = Button(self, text="Reserve", command=reserve)
+        reserve1.grid(row=1, column=1, pady=15, sticky="e")
+        self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1)
+        self.location1.grid(row=2, column=0, sticky="w")
 
         # Parking Garage 2
-        #garage = Label(self, image=garage2_img)
-        #garage.image = garage2_img
-        #garage.grid(row=3, column=0, pady=15)
-        #reserve2 = Button(self, text="Reserve", command=reserve)
-        #reserve2.grid(row=3, column=1, pady=15, sticky="e")
-        
-        #Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2).grid(row=4, column=0, sticky="w")
+        self.garage2 = Label(self, image=garage2_img)
+        self.garage2.image = garage2_img
+        self.garage2.grid(row=3, column=0, pady=15)
+        reserve2 = Button(self, text="Reserve", command=reserve)
+        reserve2.grid(row=3, column=1, pady=15, sticky="e")
+        self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2)
+        self.location2.grid(row=4, column=0, sticky="w")
 
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, columnspan=2, pady=15, sticky="w")
-
 
 # Renter - Searching Page
 """class SearchingPage(Frame):
@@ -309,7 +311,7 @@ class AddParkingPage(Frame):
             res = session.get(baseURL + "parking/") # Retriveing csrftoken 
             csrftoken = res.cookies['csrftoken']
             # using csrftoken in POST request
-            data = {'csrfmiddlewaretoken': csrftoken, 'street_address' : street_entry.get().lower(), 'city' : city_entry.get().lower(), 'state' : state_entry.get().lower(), 'zip_code' : zipcode_entry.get(), 'vehicle_type' : v_type.get().lower(), 'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),  'end_date' : end_cal.get_date(), 'end_time': clicked_end.get()}
+            data = {'csrfmiddlewaretoken': csrftoken,  'image': img, 'street_address' : street_entry.get().lower(), 'city' : city_entry.get().lower(), 'state' : state_entry.get().lower(), 'zip_code' : zipcode_entry.get(), 'vehicle_type' : v_type.get().lower(), 'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),  'end_date' : end_cal.get_date(), 'end_time': clicked_end.get()}
             res = session.post(baseURL + "parking/", data=data)
             if(res.json() == "New Spot Created"):
                 messagebox.showinfo(messagebox.showinfo(title="Success", message="Successfully Added Parking Sot"))
@@ -322,8 +324,12 @@ class AddParkingPage(Frame):
             try:
                 global img
                 filetypes = [("PNG", "*.png"), ("JPG", "*.jpg"), ('All files', '*')]
-                filepath = filedialog.askopenfilenames(title='Open files', initialdir='C:/Users/Administrator/Desktop', filetypes=filetypes, defaultextension='.jpg')
+                filepath = filedialog.askopenfilename(title='Open files', initialdir='C:/Users/Administrator/Desktop', filetypes=filetypes, defaultextension='.jpg')
                 filename.set(filepath)
+                print(filepath)
+                print(filepath)
+                print(filename.get())
+
                 img = Image.open(filename.get())
 
                 # filenewpath = filedialog.asksaveasfilename(title='upload', filetypes=filetypes, defaultextension='.png', initialdir='C:/Users/Administrator/Desktop')

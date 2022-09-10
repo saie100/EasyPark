@@ -31,12 +31,14 @@ class ParkingSpotView(viewsets.ModelViewSet):
         end_date = request.data['end_date']
         start_time = request.data['start_time']
         end_time = request.data['end_time']
+        image = request.data['image']
         
+        print(image)
         new_start_date = datetime.strptime(start_date + " " + start_time+":00", "%Y-%m-%d %H:%M:%S")
         new_end_date = datetime.strptime(end_date + " " + end_time+":00", "%Y-%m-%d %H:%M:%S")
 
         try:
-            new_spot = ParkingSpot.objects.create(client=client, street_address=street_address, city=city, state=state, zip_code=zip_code, vehicle_type=vehicle_type, start_date=new_start_date, end_date=new_end_date)
+            new_spot = ParkingSpot.objects.create(client=client, image=image, street_address=street_address, city=city, state=state, zip_code=zip_code, vehicle_type=vehicle_type, start_date=new_start_date, end_date=new_end_date)
             new_spot.save()
             return Response("New Spot Created")
         except:
