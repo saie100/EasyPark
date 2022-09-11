@@ -355,7 +355,7 @@ class AddParkingPage(Frame):
             res = session.post(url=(baseURL+ "/parking/"), data=data, files=files)
             if(res.json() == "New Spot Created"):
                 messagebox.showinfo(messagebox.showinfo(title="Success", message="Successfully Added Parking Sot"))
-                controller.show_frame(ParkingSpotPage)
+                controller.show_frame(ClientPage)
             else:
                 messagebox.showerror("Error", message="Something went wrong with backend server!")
 
