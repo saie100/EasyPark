@@ -13,6 +13,8 @@ from parking_spot.serializers import ParkingSpotSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from datetime import datetime
+from PIL import Image
+from django.core.files.base import ContentFile
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class ParkingSpotView(viewsets.ModelViewSet):
@@ -31,14 +33,16 @@ class ParkingSpotView(viewsets.ModelViewSet):
         end_date = request.data['end_date']
         start_time = request.data['start_time']
         end_time = request.data['end_time']
-        image = request.data['image']
+        image = request.FILES['media']
         
-        print(image)
+        file_content = ContentFile(image.read())
+        
         new_start_date = datetime.strptime(start_date + " " + start_time+":00", "%Y-%m-%d %H:%M:%S")
         new_end_date = datetime.strptime(end_date + " " + end_time+":00", "%Y-%m-%d %H:%M:%S")
 
         try:
-            new_spot = ParkingSpot.objects.create(client=client, image=image, street_address=street_address, city=city, state=state, zip_code=zip_code, vehicle_type=vehicle_type, start_date=new_start_date, end_date=new_end_date)
+            new_spot = ParkingSpot.objects.create(client=client, street_address=street_address, city=city, state=state, zip_code=zip_code, vehicle_type=vehicle_type, start_date=new_start_date, end_date=new_end_date)
+            new_spot.image.save(str(new_spot.id)+'.jpg', file_content, save=False)
             new_spot.save()
             return Response("New Spot Created")
         except:

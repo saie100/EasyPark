@@ -1,3 +1,4 @@
+from http.client import CannotSendRequest
 from tkinter import *
 
 from tkinter import messagebox
@@ -9,8 +10,11 @@ from tkinter import filedialog
 import datetime
 import requests
 
+from urllib.request import urlopen
+from io import BytesIO
+
 session = requests.Session() # Creates a session with the backend server
-baseURL = 'http://127.0.0.1:8000/' # Base url of the backend server
+baseURL = 'http://127.0.0.1:8000' # Base url of the backend server
 
 TitleFont = ("Comic Sans MS", 40, "bold")
 TextFont = ("Times", 12)
@@ -60,10 +64,10 @@ class LoginPage(Frame):
                 messagebox.showerror('Error', message="Email and Password Can\'t be blank")
                 
             data = {'email': email_entry.get(), 'password' : pw_entry.get()}
-            res = session.post(baseURL + 'users/signin/', data) # POST Request to authenticate user before logging in
+            res = session.post(baseURL + '/users/signin/', data) # POST Request to authenticate user before logging in
 
             if(res.json() == "User Logged In"):
-                res = session.get(baseURL + 'users/')  # GET Request to retrieve user info after authentication
+                res = session.get(baseURL + '/users/')  # GET Request to retrieve user info after authentication
                 controller.frames[UserPage].label.config(text="Welcome " + res.json()['first_name'] + "!") # Update the Welcome Label in UserPage with the user's name
                 controller.show_frame(UserPage) # Display UserPage
 
@@ -112,12 +116,12 @@ class UserPage(Frame):
         self.label.pack(padx=5, pady=5)
         
         def logoff():
-            res = session.get(baseURL + 'users/signout/')
+            res = session.get(baseURL + '/users/signout/')
 
             if(res.json() == "Logged out"):
                 controller.show_frame(LoginPage) 
             else:
-                print("Something went wrong in the backend")
+                messagebox.showerror('Error', message='Something went wrong in the backend')
 
             
         # Renter interface
@@ -191,16 +195,23 @@ class RenterPage(Frame):
         vehicle_type4.grid(row=6, column=2, sticky="w")
 
         def loadSearchPage():
-            res = session.get(baseURL + 'parking/')
+            res = session.get(baseURL + '/parking/')
 
             if(len(res.json()) == 1 ):
                 controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
                 + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date']  )
 
                 if(res.json()[0]['image'] != None):
-                    controller.frames[SearchingPage].garage1.config(image=res.json()[0]['image'])
+                    raw_data = urlopen(baseURL + res.json()[0]['image'] ).read()
+                    im = Image.open(BytesIO(raw_data))
+                    im = im.resize((200,150), Image.ANTIALIAS)
+                    photo = ImageTk.PhotoImage(im)
+                    controller.frames[SearchingPage].garage1.config(image=photo)
+                    controller.frames[SearchingPage].garage1.image=photo
+                    
 
                 controller.show_frame(SearchingPage)
+            
             elif( len(res.json()) == 2):
                 controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
                 + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date']  )
@@ -209,9 +220,19 @@ class RenterPage(Frame):
                 controller.show_frame(SearchingPage)
 
                 if(res.json()[0]['image'] != None):
-                    controller.frames[SearchingPage].garage1.config(image=res.json()[0]['image'])
+                    raw_data1 = urlopen(baseURL + res.json()[0]['image'] ).read()
+                    im1 = Image.open(BytesIO(raw_data1))
+                    im1 = im1.resize((200,150), Image.ANTIALIAS)
+                    photo1 = ImageTk.PhotoImage(im1)
+                    controller.frames[SearchingPage].garage1.config(image=photo1)
+                    controller.frames[SearchingPage].garage1.image=photo1
                 if(res.json()[1]['image'] != None):
-                    controller.frames[SearchingPage].garage2.config(image=res.json()[1]['image'])
+                    raw_data2 = urlopen(baseURL + res.json()[1]['image'] ).read()
+                    im2 = Image.open(BytesIO(raw_data2))
+                    im2 = im2.resize((200,150), Image.ANTIALIAS)
+                    photo2 = ImageTk.PhotoImage(im2)
+                    controller.frames[SearchingPage].garage2.config(image=photo2)
+                    controller.frames[SearchingPage].garage2.image=photo2
                  
             else:
                 messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
@@ -233,11 +254,11 @@ class SearchingPage(Frame):
             messagebox.showinfo(title="Success", message="Your parking spot is successfully reserved.")
             controller.show_frame(UserPage)
 
-        address1 = "Lyon St, San Francisco, CA 94123"
-        address2 = "Lombard St, San Francisco, CA 94123"
+        address1 = ""
+        address2 = ""
 
-        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
-        availabletime2 = "09/04/2022 12:00 - 09/10/2022 12:00"
+        availabletime1 = ""
+        availabletime2 = ""
 
         garage1 = Image.open("no_image.png").resize((200, 150))
         garage1_img = ImageTk.PhotoImage(garage1)
@@ -303,16 +324,19 @@ class AddParkingPage(Frame):
         clicked_end.set(time_option[0])
 
 
-        filename = StringVar()
+        self.filename = StringVar()
 
         def added():
             # When doing post requests we need to retrieve the csrftoken with a GET request then we can do a POST request
 
-            res = session.get(baseURL + "parking/") # Retriveing csrftoken 
+            res = session.get(baseURL + "/parking/") # Retriveing csrftoken 
             csrftoken = res.cookies['csrftoken']
             # using csrftoken in POST request
-            data = {'csrfmiddlewaretoken': csrftoken,  'image': img, 'street_address' : street_entry.get().lower(), 'city' : city_entry.get().lower(), 'state' : state_entry.get().lower(), 'zip_code' : zipcode_entry.get(), 'vehicle_type' : v_type.get().lower(), 'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),  'end_date' : end_cal.get_date(), 'end_time': clicked_end.get()}
-            res = session.post(baseURL + "parking/", data=data)
+            data = {'csrfmiddlewaretoken': csrftoken, 'street_address' : street_entry.get().lower(), 'city' : city_entry.get().lower(), 'state' : state_entry.get().lower(), 'zip_code' : zipcode_entry.get(), 'vehicle_type' : v_type.get().lower(), 'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),  'end_date' : end_cal.get_date(), 'end_time': clicked_end.get()}
+ 
+            files = {'media' : open(self.filename.get(),'rb')}
+            
+            res = session.post(url=(baseURL+ "/parking/"), data=data, files=files)
             if(res.json() == "New Spot Created"):
                 messagebox.showinfo(messagebox.showinfo(title="Success", message="Successfully Added Parking Sot"))
                 controller.show_frame(ClientPage)
@@ -324,13 +348,13 @@ class AddParkingPage(Frame):
             try:
                 global img
                 filetypes = [("PNG", "*.png"), ("JPG", "*.jpg"), ('All files', '*')]
-                filepath = filedialog.askopenfilename(title='Open files', initialdir='C:/Users/Administrator/Desktop', filetypes=filetypes, defaultextension='.jpg')
-                filename.set(filepath)
-                print(filepath)
-                print(filepath)
-                print(filename.get())
+                self.filepath = filedialog.askopenfilename(title='Open files', initialdir='C:/Users/Administrator/Desktop', filetypes=filetypes, defaultextension='.jpg')
+                self.filename.set(self.filepath)
+                print(self.filepath)
+                print(self.filepath)
+                print(self.filename.get())
 
-                img = Image.open(filename.get())
+                img = Image.open(self.filename.get())
 
                 # filenewpath = filedialog.asksaveasfilename(title='upload', filetypes=filetypes, defaultextension='.png', initialdir='C:/Users/Administrator/Desktop')
                 # path_var.set(filenewpath)
@@ -537,8 +561,23 @@ class AcctDeletePage(Frame):
         label = Label(self, text="Delete Account", font=TitleFont)
         label.pack(pady=20)
 
-        Button(self, text="Confirm Delete", font=TextFont, bg="white", command=lambda: controller.show_frame(LoginPage)).pack(pady=20)
+        def deleteAcc():
+            pass
+            res = session.get(baseURL + "/user/delete/") # Retriveing csrftoken 
+            csrftoken = res.cookies['csrftoken']
+
+            res = session.post(baseURL + '/users/delete/', data={'csrfmiddlewaretoken' : csrftoken})
+            if(res.json() == "User Deleted"):
+                messagebox.showinfo(title="Deleted", message="User Account Is Deleted")
+                controller.show_frame(LoginPage)
+            else:
+                messagebox.showerror("Error", message="Something went wrong with backend server!")
+
+        
+        Button(self, text="Confirm Delete", font=TextFont, bg="white", command=deleteAcc).pack(pady=20)
         Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).pack(pady=20)
+
+        
 
 
 # Monthly Report Page
@@ -577,13 +616,13 @@ class SignUpPage(Frame):
             else:
                 
                 data = {'first_name' : fn_entry.get(), 'last_name': ln_entry.get(), 'email': email_entry.get(), 'password' : pw_entry.get()}
-                res = session.post(baseURL + 'users/signup/', data)
+                res = session.post(baseURL + '/users/signup/', data)
                 
                 if(res.json() == "New User Created"):
                     messagebox.showinfo(title="Success", message="Successfully Signed Up")
                     controller.show_frame(LoginPage) 
                 else:
-                    print("Something went wrong in the backend")
+                    messagebox.showerror('Error', message='Something went wrong in the backend')
 
 
         Label(self, text="*Please fill in this form to create an account:", font=("Times", 15)).grid(row=1, column=0, columnspan=2, pady=5, sticky="nw")

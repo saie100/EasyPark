@@ -6,6 +6,8 @@ from .models import User
 from .serializers import UserSerializer
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 class UserView(viewsets.ModelViewSet):
@@ -64,7 +66,20 @@ class SignOut(viewsets.ModelViewSet):
         
         return Response("Logged out")
         
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class DeleteAccount(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+    
+    def create(self, request):
+    
+        User.objects.get(id=request.user.id).delete()
+        return Response("User Deleted")
 
+    def list(self, request):
+        
+        return Response("")
 
 
 
