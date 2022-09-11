@@ -228,7 +228,6 @@ class SearchingPage(Frame):
         label = Label(self, text="Available Parking", font=TitleFont)
         label.grid(row=0, column=0, columnspan= 2, pady=15)
 
-        
         def reserve():
             messagebox.showinfo(title="Success", message="Your parking spot is successfully reserved.")
             controller.show_frame(UserPage)
@@ -238,32 +237,49 @@ class SearchingPage(Frame):
 
         availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
         availabletime2 = "09/04/2022 12:00 - 09/10/2022 12:00"
+        
+        hourly_rate = "$1.50/hrs"
 
         garage1 = Image.open("no_image.png").resize((200, 150))
         garage1_img = ImageTk.PhotoImage(garage1)
 
         garage2 = Image.open("no_image.png").resize((200, 150))
         garage2_img = ImageTk.PhotoImage(garage2)
+        time_option = ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00",
+                       "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
+                       "20:00", "21:00", "22:00", "23:00"]
+        start_clicked = StringVar()
+        start_clicked.set(time_option[0])
+        end_clicked = StringVar()
+        end_clicked.set(time_option[0])
 
         # Parking Garage 1
-        self.garage1 = Label(self, image=garage1_img)
-        self.garage1.image = garage1_img
-        self.garage1.grid(row=1, column=0, pady=15)
+        garage = Label(self, image=garage1_img)
+        garage.image = garage1_img
+        garage.grid(row=1, column=0, pady=15)
+        start_time1 = OptionMenu(self, start_clicked, *time_option)
+        start_time1.grid(row=1, column=1)
+        Label(self, text="to    ").grid(row=1, column=2)
+        end_time1 = OptionMenu(self, end_clicked, *time_option)
+        end_time1.grid(row=1, column=3)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Hours Rate: " + hourly_rate).grid(row=2, column=0, sticky="w")
         reserve1 = Button(self, text="Reserve", command=reserve)
-        reserve1.grid(row=1, column=1, pady=15, sticky="e")
-        self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1)
-        self.location1.grid(row=2, column=0, sticky="w")
+        reserve1.grid(row=2, column=1, pady=15, columnspan=3)
 
         # Parking Garage 2
-        self.garage2 = Label(self, image=garage2_img)
-        self.garage2.image = garage2_img
-        self.garage2.grid(row=3, column=0, pady=15)
+        garage = Label(self, image=garage2_img)
+        garage.image = garage2_img
+        garage.grid(row=3, column=0, pady=15)
+        start_time1 = OptionMenu(self, start_clicked, *time_option)
+        start_time1.grid(row=3, column=1)
+        Label(self, text="to    ").grid(row=3, column=2)
+        end_time1 = OptionMenu(self, end_clicked, *time_option)
+        end_time1.grid(row=3, column=3)
+        Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate).grid(row=4, column=0, sticky="w")
         reserve2 = Button(self, text="Reserve", command=reserve)
-        reserve2.grid(row=3, column=1, pady=15, sticky="e")
-        self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2)
-        self.location2.grid(row=4, column=0, sticky="w")
+        reserve2.grid(row=4, column=1, pady=15, columnspan=3)
 
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=5, column=0, columnspan=2, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ReservationPage)).grid(row=5, column=0, pady=15, columnspan=3)
 
 # Renter - Searching Page
 """class SearchingPage(Frame):
@@ -315,7 +331,7 @@ class AddParkingPage(Frame):
             res = session.post(baseURL + "parking/", data=data)
             if(res.json() == "New Spot Created"):
                 messagebox.showinfo(messagebox.showinfo(title="Success", message="Successfully Added Parking Sot"))
-                controller.show_frame(ClientPage)
+                controller.show_frame(ParkingSpotPage)
             else:
                 messagebox.showerror("Error", message="Something went wrong with backend server!")
 
@@ -424,6 +440,7 @@ class ReservationPage(Frame):
 
         address1 = "Lyon St, San Francisco, CA 94123"
         availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
+        total = "$20.75"
 
         #garage1 = Image.open("no image.jpg").resize((200, 150))
         #garage1_img = ImageTk.PhotoImage(garage1)
@@ -431,7 +448,7 @@ class ReservationPage(Frame):
         #garage = Label(self, image=garage1_img)
         #garage.image = garage1_img
         #garage.grid(row=1, column=0, pady=15, columnspan=2)
-        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Total: " + total).grid(row=2, column=0, columnspan=2)
 
         Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
         Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
