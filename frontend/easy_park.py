@@ -36,14 +36,13 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, AcctUpdatePage, 
-                  AcctDeletePage, ReportPage, SearchingPage, ParkingSpotPage):
+        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, 
+                  AcctUpdatePage, AcctDeletePage, ReportPage, SpotResPage, ParkingSpotPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(LoginPage)
-
 
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -238,8 +237,8 @@ class RenterPage(Frame):
                 messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
 
 
-        Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=7, column=0, pady=15, sticky="e")
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=2, pady=15, sticky="w")
+        Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=7, column=2, pady=15, sticky="e")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=0, pady=15, sticky="w")
 
 
 # Renter - Searching Page
@@ -318,7 +317,7 @@ class ClientPage(Frame):
         label.pack(pady=20)
 
         Button(self, text="Add Parking Spot", font=TextFont, bg="white", command=lambda: controller.show_frame(AddParkingPage)).pack(pady=20)
-        Button(self, text="View Parking Spot", font=TextFont, bg="white").pack(pady=20)
+        Button(self, text="View Parking Spot", font=TextFont, bg="white", command=lambda: controller.show_frame(ParkingSpotPage)).pack(pady=20)
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
 
 
@@ -429,14 +428,14 @@ class AddParkingPage(Frame):
         Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=10, column=1, pady=15)
 
         Button(self, text="Add", font=TextFont, bg="white", command=added).grid(row=11, column=2, pady=15)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=11, column=0, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=11, column=0, pady=15, sticky="e")
         
 # Client - Parking Spot
 class ParkingSpotPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Parking Spot", font=TitleFont)
-        label.grid(row=0, column=0, columnspan=2)
+        label.grid(row=0, column=0, columnspan=2, pady=15, padx=20)
 
         address1 = "Lyon St, San Francisco, CA 94123"
         availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
@@ -447,12 +446,12 @@ class ParkingSpotPage(Frame):
         #garage = Label(self, image=garage1_img)
         #garage.image = garage1_img
         #garage.grid(row=1, column=0, pady=15, columnspan=2)
-        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2, pady=15, padx=20)
 
         Button(self, text="edit", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
-        Button(self, text="delete", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+        Button(self, text="delete", font=TextFont, bg="white").grid(row=3, column=1)
 
-        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=4, column=0, pady=15, columnspan=2)
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=4, column=0, columnspan=2, pady=15, padx=20)
 
         
 # Reservation page
