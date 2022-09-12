@@ -37,7 +37,7 @@ class EasyPark(Tk):
         self.frames = {}
 
         for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, 
-                  AcctUpdatePage, AcctDeletePage, ReportPage, SpotResPage, ParkingSpotPage):
+                  AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage, ParkingSpotPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -198,7 +198,7 @@ class RenterPage(Frame):
 
             if(len(res.json()) == 1 ):
                 controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
-                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date']  )
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
 
                 if(res.json()[0]['image'] != None):
                     raw_data = urlopen(baseURL + res.json()[0]['image'] ).read()
@@ -213,9 +213,9 @@ class RenterPage(Frame):
             
             elif( len(res.json()) == 2):
                 controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
-                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date']  )
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
                 controller.frames[SearchingPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code'] 
-                + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date']  )
+                + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $1.50" )
                 controller.show_frame(SearchingPage)
 
                 if(res.json()[0]['image'] != None):
@@ -252,13 +252,13 @@ class SearchingPage(Frame):
             messagebox.showinfo(title="Success", message="Your parking spot is successfully reserved.")
             controller.show_frame(UserPage)
 
-        address1 = ""
-        address2 = ""
+        address1 = "N/A"
+        address2 = "N/A"
 
-        availabletime1 = ""
-        availabletime2 = ""
+        availabletime1 = "N/A"
+        availabletime2 = "N/A"
         
-        hourly_rate = "$1.50/hrs"
+        hourly_rate = "N/A"
 
         garage1 = Image.open("no_image.png").resize((200, 150))
         garage1_img = ImageTk.PhotoImage(garage1)
@@ -274,39 +274,34 @@ class SearchingPage(Frame):
         end_clicked.set(time_option[0])
 
         # Parking Garage 1
-        garage = Label(self, image=garage1_img)
-        garage.image = garage1_img
-        garage.grid(row=1, column=0, pady=15)
+        self.garage1 = Label(self, image=garage1_img)
+        self.garage1.image = garage1_img
+        self.garage1.grid(row=1, column=0, pady=15)
         start_time1 = OptionMenu(self, start_clicked, *time_option)
         start_time1.grid(row=1, column=1)
-        Label(self, text="to    ").grid(row=1, column=2)
+        Label(self, text="   to   ").grid(row=1, column=2)
         end_time1 = OptionMenu(self, end_clicked, *time_option)
         end_time1.grid(row=1, column=3)
-        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Hours Rate: " + hourly_rate).grid(row=2, column=0, sticky="w")
+        self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Hourly Rate: " + hourly_rate)
+        self.location1.grid(row=2, column=0, sticky="w")
         reserve1 = Button(self, text="Reserve", command=reserve)
         reserve1.grid(row=2, column=1, pady=15, columnspan=3)
 
         # Parking Garage 2
-        garage = Label(self, image=garage2_img)
-        garage.image = garage2_img
-        garage.grid(row=3, column=0, pady=15)
+        self.garage2 = Label(self, image=garage2_img)
+        self.garage2.image = garage2_img
+        self.garage2.grid(row=3, column=0, pady=15)
         start_time1 = OptionMenu(self, start_clicked, *time_option)
         start_time1.grid(row=3, column=1)
-        Label(self, text="to    ").grid(row=3, column=2)
+        Label(self, text="   to   ").grid(row=3, column=2)
         end_time1 = OptionMenu(self, end_clicked, *time_option)
         end_time1.grid(row=3, column=3)
-        Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate).grid(row=4, column=0, sticky="w")
+        self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate)
+        self.location2.grid(row=4, column=0, sticky="w")
         reserve2 = Button(self, text="Reserve", command=reserve)
         reserve2.grid(row=4, column=1, pady=15, columnspan=3)
 
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ReservationPage)).grid(row=5, column=0, pady=15, columnspan=3)
-
-# Renter - Searching Page
-"""class SearchingPage(Frame):
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
-        label = Label(self, text="Find Parking Spot", font=TitleFont)
-        label.grid(row=0, column=0, columnspan=3, padx=10, pady=15)"""
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=5, column=0, pady=15, columnspan=3)
 
 
 # Client Page
@@ -365,15 +360,7 @@ class AddParkingPage(Frame):
                 filetypes = [("PNG", "*.png"), ("JPG", "*.jpg"), ('All files', '*')]
                 self.filepath = filedialog.askopenfilename(title='Open files', initialdir='C:/Users/Administrator/Desktop', filetypes=filetypes, defaultextension='.jpg')
                 self.filename.set(self.filepath)
-                print(self.filepath)
-                print(self.filepath)
-                print(self.filename.get())
-
                 img = Image.open(self.filename.get())
-
-                # filenewpath = filedialog.asksaveasfilename(title='upload', filetypes=filetypes, defaultextension='.png', initialdir='C:/Users/Administrator/Desktop')
-                # path_var.set(filenewpath)
-                # img.save(str(path_var.get()))
             except Exception as e:
                 print(e)
 
@@ -437,16 +424,10 @@ class ParkingSpotPage(Frame):
         label = Label(self, text="Parking Spot", font=TitleFont)
         label.grid(row=0, column=0, columnspan=2, pady=15, padx=20)
 
-        address1 = "Lyon St, San Francisco, CA 94123"
-        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
+        address1 = ""
+        availabletime1 = ""
 
-        #garage1 = Image.open("no image.jpg").resize((200, 150))
-        #garage1_img = ImageTk.PhotoImage(garage1)
-
-        #garage = Label(self, image=garage1_img)
-        #garage.image = garage1_img
-        #garage.grid(row=1, column=0, pady=15, columnspan=2)
-        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2, pady=15, padx=20)
+        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
 
         Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
         Button(self, text="delete", font=TextFont, bg="white").grid(row=3, column=1)
@@ -461,30 +442,18 @@ class ReservationPage(Frame):
         label = Label(self, text="Reservation", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        address1 = "Lyon St, San Francisco, CA 94123"
-        availabletime1 = "09/04/2022 00:00 - 09/08/2022 00:00"
-        total = "$20.75"
+        address1 = ""
+        availabletime1 = ""
+        total = "$20.45"
 
-        #garage1 = Image.open("no image.jpg").resize((200, 150))
-        #garage1_img = ImageTk.PhotoImage(garage1)
-
-        #garage = Label(self, image=garage1_img)
-        #garage.image = garage1_img
-        #garage.grid(row=1, column=0, pady=15, columnspan=2)
-        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Total: " + total).grid(row=2, column=0, columnspan=2)
+        
+        self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Total: " + total).grid(row=2, column=0, columnspan=2)
 
         Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
         Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
 
         Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=4, column=0, pady=15, columnspan=2)
 
-        
-# Client - Parking Spot
-class ParkingSpotPage(Frame):
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
-        label = Label(self, text="Find Parking Spot", font=TitleFont)
-        label.pack(pady=20)
         
         
 # Update Account page
