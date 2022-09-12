@@ -448,7 +448,7 @@ class ParkingSpotPage(Frame):
         #garage.grid(row=1, column=0, pady=15, columnspan=2)
         Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2, pady=15, padx=20)
 
-        Button(self, text="edit", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
+        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
         Button(self, text="delete", font=TextFont, bg="white").grid(row=3, column=1)
 
         Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=4, column=0, columnspan=2, pady=15, padx=20)
