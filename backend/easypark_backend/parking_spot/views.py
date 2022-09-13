@@ -49,6 +49,15 @@ class ParkingSpotView(viewsets.ModelViewSet):
             return Response("Something went wrong in the backend")
     
     def list(self, request):
-        self.queryset = ParkingSpot.objects.filter().order_by('-id')[:2]
-        #self.queryset = ParkingSpot.objects.all()
-        return Response(self.serializer_class(self.queryset, many=True).data)
+
+        if(request.GET.get('client') == 'yes'):
+            self.queryset = ParkingSpot.objects.filter(client=request.user).order_by('-id')[:1]
+            return Response(self.serializer_class(self.queryset, many=True).data)
+        else:
+            self.queryset = ParkingSpot.objects.filter().order_by('-id')[:2]
+            return Response(self.serializer_class(self.queryset, many=True).data)
+
+
+
+
+

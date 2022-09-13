@@ -1,3 +1,4 @@
+import email
 from http.client import CannotSendRequest
 from tkinter import *
 
@@ -36,7 +37,7 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, ClientPage, AddParkingPage, ReservationPage, 
+        for F in (LoginPage, UserPage, SignUpPage, RenterPage, RenterSearchPage, ClientPage, AddParkingPage, ReservationPage, 
                   AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage, ParkingSpotPage):
             frame = F(container, self)
             self.frames[F] = frame
@@ -128,9 +129,6 @@ class UserPage(Frame):
         # Client interface
         client_button = Button(self, text="Client", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage))
         client_button.pack(padx=5, pady=20)
-        # View Reservation
-        edit_button = Button(self, text="View Reservation", bg="white", font=TextFont, command=lambda: controller.show_frame(ReservationPage))
-        edit_button.pack(padx=5, pady=20)
         # Update Account
         edit_button = Button(self, text="Update Account", bg="white", font=TextFont, command=lambda: controller.show_frame(AcctUpdatePage))
         edit_button.pack(padx=5, pady=20)
@@ -145,8 +143,8 @@ class UserPage(Frame):
         logoff_button.pack(padx=5, pady=20)
 
 
-# Renter Page
-class RenterPage(Frame):
+# Renter Search Page
+class RenterSearchPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Find Parking Spot", font=TitleFont)
@@ -251,6 +249,19 @@ class RenterPage(Frame):
         Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=9, column=2, pady=15, sticky="e")
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=9, column=0, pady=15, sticky="w")
 
+class RenterPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Renter Page", font=TitleFont)
+        label.pack(pady=20)
+
+        def loadReservation():
+            pass
+
+        Button(self, text="Search For Parking", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterSearchPage)).pack(pady=20)
+        Button(self, text="View Reservation", font=TextFont, bg="white", command=loadReservation).pack(pady=20)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
+
 
 # Renter - Searching Page
 class SearchingPage(Frame):
@@ -312,18 +323,63 @@ class SearchingPage(Frame):
         reserve2 = Button(self, text="Reserve", command=reserve)
         reserve2.grid(row=4, column=1, pady=15, columnspan=3)
 
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=5, column=0, pady=15, columnspan=3)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterSearchPage)).grid(row=5, column=0, pady=15, columnspan=3)
 
 
 # Client Page
 class ClientPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        label = Label(self, text="Find Parking Spot", font=TitleFont)
+        label = Label(self, text="Client Page", font=TitleFont)
         label.pack(pady=20)
 
+        def loadClientParkingSpot():
+            
+            res = session.get(baseURL + '/parking/?client=yes')
+            
+            if(len(res.json()) == 1 ):
+                controller.frames[ParkingSpotPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
+
+                if(res.json()[0]['image'] != None):
+                    raw_data = urlopen(baseURL + res.json()[0]['image'] ).read()
+                    im = Image.open(BytesIO(raw_data))
+                    im = im.resize((200,150), Image.ANTIALIAS)
+                    photo = ImageTk.PhotoImage(im)
+                    controller.frames[ParkingSpotPage].garage1.config(image=photo)
+                    controller.frames[ParkingSpotPage].garage1.image=photo
+            
+            elif( len(res.json()) == 2):
+                controller.frames[ParkingSpotPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
+                controller.frames[SearchingPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code'] 
+                + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $1.50" )
+                controller.show_frame(ParkingSpotPage)
+
+                if(res.json()[0]['image'] != None):
+                    raw_data1 = urlopen(baseURL + res.json()[0]['image'] ).read()
+                    im1 = Image.open(BytesIO(raw_data1))
+                    im1 = im1.resize((200,150), Image.ANTIALIAS)
+                    photo1 = ImageTk.PhotoImage(im1)
+                    controller.frames[ParkingSpotPage].garage1.config(image=photo1)
+                    controller.frames[ParkingSpotPage].garage1.image=photo1
+                if(res.json()[1]['image'] != None):
+                    raw_data2 = urlopen(baseURL + res.json()[1]['image'] ).read()
+                    im2 = Image.open(BytesIO(raw_data2))
+                    im2 = im2.resize((200,150), Image.ANTIALIAS)
+                    photo2 = ImageTk.PhotoImage(im2)
+                    controller.frames[ParkingSpotPage].garage2.config(image=photo2)
+                    controller.frames[ParkingSpotPage].garage2.image=photo2
+
+            controller.show_frame(ParkingSpotPage)
+
+        def loadClientReservation():
+            pass
+
+
         Button(self, text="Add Parking Spot", font=TextFont, bg="white", command=lambda: controller.show_frame(AddParkingPage)).pack(pady=20)
-        Button(self, text="View Parking Spot", font=TextFont, bg="white", command=lambda: controller.show_frame(ParkingSpotPage)).pack(pady=20)
+        Button(self, text="View Parking Spot", font=TextFont, bg="white", command=loadClientParkingSpot).pack(pady=20)
+        Button(self, text="View Reservation", font=TextFont, bg="white", command=loadClientReservation).pack(pady=20)
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
 
 
@@ -432,19 +488,60 @@ class AddParkingPage(Frame):
 class ParkingSpotPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
-        label = Label(self, text="Parking Spot", font=TitleFont)
-        label.grid(row=0, column=0, columnspan=2, pady=15, padx=20)
+        label = Label(self, text="My Parking Spots", font=TitleFont)
+        label.grid(row=0, column=0, columnspan= 2, pady=15)
 
-        address1 = ""
-        availabletime1 = ""
+        def delete(spotNum):
+            messagebox.showinfo(title="Success", message="Parking Spot Deleted")
 
-        Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1).grid(row=2, column=0, columnspan=2)
+            controller.show_frame(ParkingSpotPage)
+        
+        def modify(spotNum):
+            messagebox.showinfo(title="Success", message="Parking Spot Modified")
 
-        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
-        Button(self, text="delete", font=TextFont, bg="white").grid(row=3, column=1)
+            controller.show_frame(ParkingSpotPage)
 
-        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=4, column=0, columnspan=2, pady=15, padx=20)
+        address1 = "N/A"
+        address2 = "N/A"
 
+        availabletime1 = "N/A"
+        availabletime2 = "N/A"
+        
+        hourly_rate = "N/A"
+
+        garage1 = Image.open("no_image.png").resize((200, 150))
+        garage1_img = ImageTk.PhotoImage(garage1)
+
+        garage2 = Image.open("no_image.png").resize((200, 150))
+        garage2_img = ImageTk.PhotoImage(garage2)
+
+        # Parking Garage 1
+        self.garage1 = Label(self, image=garage1_img)
+        self.garage1.image = garage1_img
+        self.garage1.grid(row=1, column=0, pady=15)
+        self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Hourly Rate: " + hourly_rate)
+        self.location1.grid(row=2, column=0, sticky="w")
+
+        modify1 = Button(self, text="Modify", command=lambda : modify(1))
+        modify1.grid(row=2, column=2, columnspan=3)
+        delete1 = Button(self, text="Delete", command=lambda : delete(1))
+        delete1.grid(row=2, column=5, columnspan=3)
+
+        # Parking Garage 2
+        self.garage2 = Label(self, image=garage2_img)
+        self.garage2.image = garage2_img
+        self.garage2.grid(row=3, column=0, pady=15)
+        self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate)
+        self.location2.grid(row=4, column=0, sticky="w")
+        
+        modify2 = Button(self, text="Modify", command=lambda : modify(2))
+        modify2.grid(row=4, column=2, columnspan=3)
+        delete2 = Button(self, text="Delete", command=lambda : delete(2))
+        delete2.grid(row=4, column=5,columnspan=3)
+
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=5, column=0, pady=15, columnspan=3)
+
+    
         
 # Reservation page
 class ReservationPage(Frame):
@@ -476,78 +573,70 @@ class AcctUpdatePage(Frame):
         Label(self, text="*Please fill in what you would like to update:", font=("Times", 15)).grid(row=1, column=0, columnspan=2, pady=5, sticky="nw")
 
         def update():
-            if firstname != "":
-                new_firstname = firstname
-            if lastname != "":
-                new_lastname = lastname
-            if email != "":
-                new_email = email
-            if phone != "":
-                new_phone = phone
-            if password != "":
-                new_password = password
-            if bank != "":
-                new_bank = bank
-            if routing != "":
-                new_routing = routing
-            if account != "":
-                new_account = account
-            controller.show_frame(UserPage)
+
+            res = session.get(baseURL + "/users/update/") # Retriveing csrftoken 
+            csrftoken = res.cookies['csrftoken']
+
+            res = session.post(baseURL + '/users/update/', data={ 'csrfmiddlewaretoken': csrftoken, 'first_name': fn_entry.get(), 'last_name': ln_entry.get(), 
+            'email' : email_entry.get(), 'phone': phone_entry.get(), 'bank_name' : bank_entry.get(), 'routing' : routing_entry.get(),
+            'account' : account_entry.get()
+             })
+
+            if(res.json() == "User Updated"): 
+                messagebox.showinfo(title="Success", message="Account has been!")
+                newRes = session.get(baseURL + '/users/')  # GET Request to retrieve user info after update
+                controller.frames[UserPage].label.config(text="Welcome " + newRes.json()['first_name'] + "!") # Update the Welcome Label in UserPage with the user's name
+                #### Make other updates to user's account 
+                ###
+                ###
+                ###
+                controller.show_frame(UserPage)
+            else:
+                messagebox.showerror("Error", message="Something went wrong with backend server!")
+            
 
         # First Name
-        Label(self, text="First Name:*", font=TextFont).grid(row=2, column=0, pady=5, sticky="e")
+        Label(self, text="First Name:", font=TextFont).grid(row=2, column=0, pady=5, sticky="e")
         fn_entry = Entry(self, font=TextFont)
         fn_entry.grid(row=2, column=1, sticky="w")
 
         # Last Name
-        Label(self, text="Last Name:*", font=TextFont).grid(row=3, column=0, pady=5, sticky="e")
+        Label(self, text="Last Name:", font=TextFont).grid(row=3, column=0, pady=5, sticky="e")
         ln_entry = Entry(self, font=TextFont)
         ln_entry.grid(row=3, column=1, sticky="w")
 
         # Email
-        Label(self, text="Email Address:*", font=TextFont).grid(row=4, column=0, pady=5, sticky="e")
+        Label(self, text="Email Address:", font=TextFont).grid(row=4, column=0, pady=5, sticky="e")
         email_entry = Entry(self, font=TextFont)
         email_entry.grid(row=4, column=1, sticky="w")
 
         # Phone Number
-        Label(self, text="Phone#:*", font=TextFont).grid(row=5, column=0, pady=5, sticky="e")
+        Label(self, text="Phone#:", font=TextFont).grid(row=5, column=0, pady=5, sticky="e")
         phone_entry = Entry(self, font=("Comic Sans MS", 10))
         phone_entry.grid(row=5, column=1, sticky="w")
 
         # Password
-        Label(self, text="Password:*", font=TextFont).grid(row=6, column=0, pady=5, sticky="e")
+        Label(self, text="Password:", font=TextFont).grid(row=6, column=0, pady=5, sticky="e")
         pw_entry = Entry(self, font=TextFont)
         pw_entry.grid(row=6, column=1, sticky="w")
 
         # Bank Info
-        Label(self, text="Bank Name:*", font=TextFont).grid(row=8, column=0, pady=5, sticky="e")
+        Label(self, text="Bank Name:", font=TextFont).grid(row=8, column=0, pady=5, sticky="e")
         bank_entry = Entry(self, font=TextFont)
         bank_entry.grid(row=8, column=1, sticky="w")
 
         # Routing Number
-        Label(self, text="Routing Number:*", font=TextFont).grid(row=9, column=0, sticky="e")
+        Label(self, text="Routing Number:", font=TextFont).grid(row=9, column=0, sticky="e")
         routing_entry = Entry(self, font=TextFont)
         routing_entry.grid(row=9, column=1, sticky="w")
 
         # Account Number
-        Label(self, text="Account Number:*", font=TextFont).grid(row=10, column=0, pady=5, sticky="e")
+        Label(self, text="Account Number:", font=TextFont).grid(row=10, column=0, pady=5, sticky="e")
         account_entry = Entry(self, font=TextFont)
         account_entry.grid(row=10, column=1, sticky="w")
 
-        Button(self, text="Confirm Update", font=TextFont, bg="white", command=update).grid(row=11, column=0)
-
-        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).grid(row=11, column=1, padx=10, pady=10)
-
-        # Getter
-        firstname = fn_entry.get()
-        lastname = ln_entry.get()
-        email_input = email_entry.get()
-        email = verify_email(email_input)
-        phone = phone_entry.get()
-        password = pw_entry.get()
-        bank = bank_entry.get()
-        routing = routing_entry.get()
-        account = account_entry.get()
+        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).grid(row=11, column=0)
+        Button(self, text="Confirm Update", font=TextFont, bg="white", command=update).grid(row=11, column=1, padx=10, pady=10)
 
 
 # Delete Account page
@@ -603,15 +692,17 @@ class SignUpPage(Frame):
 
             if not fn_entry.get() or not ln_entry.get() or not email_entry.get() or not phone_entry.get() or not pw_entry.get() or not confirm_entry.get() or not bank_entry.get() or not routing_entry.get() or not account_entry.get(): 
                 messagebox.showerror('Error', message='Please fill in all info!')
-                if password != confirm:
+                if pw_entry.get() != confirm_entry.get():
                     messagebox.showerror('Error', message='Password and confirm password must be the same!')
-                    if type(phone) != int and len(phone) != 10:
+                    if type(phone_entry.get()) != int and len(phone_entry.get()) != 10:
                         messagebox.showerror('Error', message='Phone Number enter is increase!')
-                        if not email_verify:
+                        if not email_entry.get():
                             messagebox.showerror('Error', message='Email enter is increase!')
             else:
                 
-                data = {'first_name' : fn_entry.get(), 'last_name': ln_entry.get(), 'email': email_entry.get(), 'password' : pw_entry.get()}
+                data = {'first_name' : fn_entry.get(), 'last_name': ln_entry.get(), 'email': email_entry.get(), 'password' : pw_entry.get(),
+                'phone': phone_entry.get(), 'bank_name' : bank_entry.get(), 'routing' : routing_entry.get(), 'account' : account_entry.get()
+                }
                 res = session.post(baseURL + '/users/signup/', data)
                 
                 if(res.json() == "New User Created"):
@@ -668,20 +759,8 @@ class SignUpPage(Frame):
         account_entry = Entry(self, font=TextFont)
         account_entry.grid(row=10, column=1, sticky="w")
 
-        # Getter
-        firstname = fn_entry.get()
-        lastname = ln_entry.get()
-        email = email_entry.get()
-        email_verify = verify_email(email)
-        phone = phone_entry.get()
-        password = pw_entry.get()
-        confirm = confirm_entry.get()
-        bank = bank_entry.get()
-        routing = routing_entry.get()
-        account = account_entry.get()
-
         Button(self, text="Confirm", command=verifyAcc, font=TextFont).grid(row=13, column=1, pady=30, sticky="e")
-        Button(self, text="Login", command=lambda: controller.show_frame(LoginPage), font=TextFont).grid(row=13, column=0)
+        Button(self, text="Back", command=lambda: controller.show_frame(LoginPage), font=TextFont).grid(row=13, column=0)
 
 
 # Driver Code
