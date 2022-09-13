@@ -122,7 +122,6 @@ class UserPage(Frame):
             else:
                 messagebox.showerror('Error', message='Something went wrong in the backend')
 
-            
         # Renter interface
         renter_button = Button(self, text="Renter", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage))
         renter_button.pack(padx=5, pady=20)
@@ -163,35 +162,47 @@ class RenterPage(Frame):
         v_type = StringVar()
 
         # Start Date & Time
-        Label(self, text="Start Day & Time:", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
+        Label(self, text="Start Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
         start_cal = DateEntry(self, selectmode='day')
         start_cal.grid(row=1, column=1)
         start_time = OptionMenu(self, clicked, *time_option)
         start_time.grid(row=1, column=2)
 
         # End Date & Time
-        Label(self, text="End Day & Time:", font=TextFont).grid(row=2, column=0, pady=15, sticky="e")
+        Label(self, text="End Day & Time:*", font=TextFont).grid(row=2, column=0, pady=15, sticky="e")
         end_cal = DateEntry(self, selectmode='day')
         end_cal.grid(row=2, column=1)
         end_time = OptionMenu(self, clicked, *time_option)
         end_time.grid(row=2, column=2)
 
         # Location
-        Label(self, text="Location: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
+        Label(self, text="Street:", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
+        street_entry = Entry(self, font=TextFont)
+        street_entry.grid(row=3, column=1)
+
+        Label(self, text="City:", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
         city_entry = Entry(self, font=TextFont)
-        city_entry.grid(row=3, column=1)
+        city_entry.grid(row=4, column=1)
+
+        Label(self, text="State:", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
+        state_entry = Entry(self, font=TextFont)
+        state_entry.grid(row=5, column=1)
+
+        Label(self, text="Zip Code:*", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
+        zipcode_entry = Entry(self, font=TextFont)
+        zipcode_entry.grid(row=6, column=1)
 
         # Vehicle Type
-        Label(self, text="Vehicle Type: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
+        Label(self, text="Vehicle Type:*", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
         v_type.set("Compact")
         vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
-        vehicle_type1.grid(row=5, column=1, sticky="w")
+        vehicle_type1.grid(row=7, column=1, sticky="w")
         vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
-        vehicle_type2.grid(row=5, column=2, sticky="w")
+        vehicle_type2.grid(row=7, column=2, sticky="w")
         vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
-        vehicle_type3.grid(row=6, column=1, pady=5, sticky="w")
+        vehicle_type3.grid(row=8, column=1, pady=5, sticky="w")
         vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
-        vehicle_type4.grid(row=6, column=2, sticky="w")
+        vehicle_type4.grid(row=8, column=2, sticky="w")
 
         def loadSearchPage():
             res = session.get(baseURL + '/parking/')
@@ -237,8 +248,8 @@ class RenterPage(Frame):
                 messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
 
 
-        Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=7, column=2, pady=15, sticky="e")
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=7, column=0, pady=15, sticky="w")
+        Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=9, column=2, pady=15, sticky="e")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=9, column=0, pady=15, sticky="w")
 
 
 # Renter - Searching Page
@@ -357,7 +368,7 @@ class AddParkingPage(Frame):
         def save_png():
             try:
                 global img
-                filetypes = [("PNG", "*.png"), ("JPG", "*.jpg"), ('All files', '*')]
+                filetypes = [("PNG", "*.png"), ("JPG", "*.jpg")]
                 self.filepath = filedialog.askopenfilename(title='Open files', initialdir='C:/Users/Administrator/Desktop', filetypes=filetypes, defaultextension='.jpg')
                 self.filename.set(self.filepath)
                 img = Image.open(self.filename.get())
@@ -367,14 +378,14 @@ class AddParkingPage(Frame):
         v_type = StringVar()
 
         # Start Date & Time
-        Label(self, text="Start Day & Time:", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
+        Label(self, text="Start Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
         start_cal = DateEntry(self, selectmode='day')
         start_cal.grid(row=1, column=1)
         start_time = OptionMenu(self, clicked_start, *time_option)
         start_time.grid(row=1, column=2)
 
         # End Date & Time
-        Label(self, text="End Day & Time:", font=TextFont).grid(row=2, column=0, pady=15, sticky="e")
+        Label(self, text="End Day & Time:*", font=TextFont).grid(row=2, column=0, pady=15, sticky="e")
         end_cal = DateEntry(self, selectmode='day')
         end_cal.grid(row=2, column=1)
         end_time = OptionMenu(self, clicked_end, *time_option)
@@ -384,21 +395,21 @@ class AddParkingPage(Frame):
         #Label(self, text="House #: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
         #house_entry = Entry(self, font=TextFont)
         #house_entry.grid(row=3, column=1)
-        Label(self, text="Street: ", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
+        Label(self, text="Street:*", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
         street_entry = Entry(self, font=TextFont)
         street_entry.grid(row=4, column=1)
-        Label(self, text="City: ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
+        Label(self, text="City:* ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
         city_entry = Entry(self, font=TextFont)
         city_entry.grid(row=5, column=1)
-        Label(self, text="State: ", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
+        Label(self, text="State:*", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
         state_entry = Entry(self, font=TextFont)
         state_entry.grid(row=6, column=1)
-        Label(self, text="Zip Code: ", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
+        Label(self, text="Zip Code:*", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
         zipcode_entry = Entry(self, font=TextFont)
         zipcode_entry.grid(row=7, column=1)
 
         # Vehicle Type
-        Label(self, text="Vehicle Type Fit In Garage: ", font=TextFont).grid(row=8, column=0, pady=15, sticky="e")
+        Label(self, text="Vehicle Type Fit In Garage:*", font=TextFont).grid(row=8, column=0, pady=15, sticky="e")
         v_type.set("Compact")
         vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
         vehicle_type1.grid(row=8, column=1, sticky="w")
@@ -669,8 +680,8 @@ class SignUpPage(Frame):
         routing = routing_entry.get()
         account = account_entry.get()
 
-        Button(self, text="Confirm", command=verifyAcc, font=TextFont).grid(row=13, column=0, pady=30, sticky="e")
-        Button(self, text="Login", command=lambda: controller.show_frame(LoginPage), font=TextFont).grid(row=13, column=1)
+        Button(self, text="Confirm", command=verifyAcc, font=TextFont).grid(row=13, column=1, pady=30, sticky="e")
+        Button(self, text="Login", command=lambda: controller.show_frame(LoginPage), font=TextFont).grid(row=13, column=0)
 
 
 # Driver Code
