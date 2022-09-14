@@ -14,8 +14,8 @@ import requests
 from urllib.request import urlopen
 from io import BytesIO
 
-session = requests.Session() # Creates a session with the backend server
-baseURL = 'http://127.0.0.1:8000' # Base url of the backend server
+session = requests.Session()  # Creates a session with the backend server
+baseURL = 'http://127.0.0.1:8000'  # Base url of the backend server
 
 TitleFont = ("Comic Sans MS", 40, "bold")
 TextFont = ("Times", 12)
@@ -35,10 +35,11 @@ class EasyPark(Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        self.frames = {}
+        self.frames = {LoginPage, UserPage, RenterPage, RenterReservationPage,  ClientPage,  SearchPage,
+                       ParkingDisplayPage, AddParkingPage, ParkingSpotPage, ClientReservationPage, AccountPage,
+                       AccountPage, ViewAcctPage, AcctUpdatePage, AcctDeletePage, ReportPage, SignUpPage}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, RenterSearchPage, ClientPage, AddParkingPage, ReservationPage, 
-                  AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage, ParkingSpotPage):
+        for F in ():
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -63,15 +64,15 @@ class LoginPage(Frame):
             if account == "" or password == "":
                 messagebox.showerror('Error', message="Email and Password Can\'t be blank")
                 
-            data = {'email': email_entry.get(), 'password' : pw_entry.get()}
-            res = session.post(baseURL + '/users/signin/', data) # POST Request to authenticate user before logging in
+            data = {'email': email_entry.get(), 'password': pw_entry.get()}
+            res = session.post(baseURL + '/users/signin/', data)  # POST Request to authenticate user before logging in
 
-            if(res.json() == "User Logged In"):
+            if res.json() == "User Logged In":
                 res = session.get(baseURL + '/users/')  # GET Request to retrieve user info after authentication
-                controller.frames[UserPage].label.config(text="Welcome " + res.json()['first_name'] + "!") # Update the Welcome Label in UserPage with the user's name
-                controller.show_frame(UserPage) # Display UserPage
+                controller.frames[UserPage].label.config(text="Welcome " + res.json()['first_name'] + "!")  # Update the Welcome Label in UserPage with the user's name
+                controller.show_frame(UserPage)  # Display UserPage
 
-            elif(res.json() == "Wrong Credentials"):
+            elif res.json() == "Wrong Credentials":
                 messagebox.showerror('Error', message="Incorrect Credentials")
             else:
                 messagebox.showerror('Error', message="Something went wrong with backend server!")
@@ -118,7 +119,7 @@ class UserPage(Frame):
         def logoff():
             res = session.get(baseURL + '/users/signout/')
 
-            if(res.json() == "Logged out"):
+            if res.json() == "Logged out":
                 controller.show_frame(LoginPage) 
             else:
                 messagebox.showerror('Error', message='Something went wrong in the backend')
@@ -129,12 +130,9 @@ class UserPage(Frame):
         # Client interface
         client_button = Button(self, text="Client", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage))
         client_button.pack(padx=5, pady=20)
-        # Update Account
-        edit_button = Button(self, text="Update Account", bg="white", font=TextFont, command=lambda: controller.show_frame(AcctUpdatePage))
-        edit_button.pack(padx=5, pady=20)
-        # Delete Account
-        delete_button = Button(self, text="Delete Account", bg="white", font=TextFont, command=lambda: controller.show_frame(AcctDeletePage))
-        delete_button.pack(padx=5, pady=20)
+        # Account interface
+        account_button = Button(self, text="Account", font=TextFont, bg="white", command=lambda: controller.show_frame(AccountPage))
+        account_button.pack(padx=5, pady=20)
         # Monthly Report
         delete_button = Button(self, text="Monthly Report", bg="white", font=TextFont, command=lambda: controller.show_frame(ReportPage))
         delete_button.pack(padx=5, pady=20)
@@ -143,8 +141,118 @@ class UserPage(Frame):
         logoff_button.pack(padx=5, pady=20)
 
 
+# Renter Page
+class RenterPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Renter Page", font=TitleFont)
+        label.pack(pady=20)
+
+        def loadReservation():
+            pass
+
+        Button(self, text="Search For Parking", font=TextFont, bg="white", command=lambda: controller.show_frame(SearchPage)).pack(pady=20)
+        Button(self, text="View Reservation", font=TextFont, bg="white", command=loadReservation).pack(pady=20)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
+
+
+# Renter - Reservation page
+class RenterReservationPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Reservation", font=TitleFont)
+        label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
+
+        garage = Image.open("no_image.png").resize((200, 150))
+        garage_img = ImageTk.PhotoImage(garage)
+
+        clientname = "N/A"
+        address = "N/A"
+        timeseleted = "N/A"
+        total = ""
+
+        self.garage1 = Label(self, image=garage_img)
+        self.garage1.image = garage_img
+        self.garage1.grid(row=1, column=0, pady=15)
+        resv_label = Label(self,
+                           text="Client: " + clientname + "Location: " + address + "\n" + "Time: " + timeseleted + "\n" + "Total: " + total)
+        resv_label.grid(row=2, column=0, columnspan=2)
+        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(
+            row=4, column=0, pady=15, columnspan=2)
+
+
+# Client Page
+class ClientPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Client Page", font=TitleFont)
+        label.pack(pady=20)
+
+        def loadClientParkingSpot():
+
+            res = session.get(baseURL + '/parking/?client=yes')
+
+            if len(res.json()) == 1:
+                controller.frames[ParkingSpotPage].location1.config(
+                    text="Location: " + res.json()[0]['street_address'] + ", " + res.json()[0]['city'] + ", " +
+                         res.json()[0]['state'] + " " + res.json()[0]['zip_code']
+                         + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0][
+                             'end_date'] + "\nHourly Rate: $1.50")
+
+                if res.json()[0]['image'] != None:
+                    raw_data = urlopen(baseURL + res.json()[0]['image']).read()
+                    im = Image.open(BytesIO(raw_data))
+                    im = im.resize((200, 150), Image.ANTIALIAS)
+                    photo = ImageTk.PhotoImage(im)
+                    controller.frames[ParkingSpotPage].garage1.config(image=photo)
+                    controller.frames[ParkingSpotPage].garage1.image = photo
+
+            elif len(res.json()) == 2:
+                controller.frames[ParkingSpotPage].location1.config(
+                    text="Location: " + res.json()[0]['street_address'] + ", " + res.json()[0]['city'] + ", " +
+                         res.json()[0]['state'] + " " + res.json()[0]['zip_code']
+                         + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0][
+                             'end_date'] + "\nHourly Rate: $1.50")
+                controller.frames[ParkingDisplayPage].location2.config(
+                    text="Location: " + res.json()[1]['street_address'] + ", " + res.json()[1]['city'] + ", " +
+                         res.json()[1]['state'] + " " + res.json()[1]['zip_code']
+                         + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1][
+                             'end_date'] + "\nHourly Rate: $1.50")
+                controller.show_frame(ParkingSpotPage)
+
+                if res.json()[0]['image'] != None:
+                    raw_data1 = urlopen(baseURL + res.json()[0]['image']).read()
+                    im1 = Image.open(BytesIO(raw_data1))
+                    im1 = im1.resize((200, 150), Image.ANTIALIAS)
+                    photo1 = ImageTk.PhotoImage(im1)
+                    controller.frames[ParkingSpotPage].garage1.config(image=photo1)
+                    controller.frames[ParkingSpotPage].garage1.image = photo1
+                if res.json()[1]['image'] != None:
+                    raw_data2 = urlopen(baseURL + res.json()[1]['image']).read()
+                    im2 = Image.open(BytesIO(raw_data2))
+                    im2 = im2.resize((200, 150), Image.ANTIALIAS)
+                    photo2 = ImageTk.PhotoImage(im2)
+                    controller.frames[ParkingSpotPage].garage2.config(image=photo2)
+                    controller.frames[ParkingSpotPage].garage2.image = photo2
+
+            controller.show_frame(ParkingSpotPage)
+
+        def loadClientReservation():
+            pass
+
+        Button(self, text="Add Parking Spot", font=TextFont, bg="white",
+               command=lambda: controller.show_frame(AddParkingPage)).pack(pady=20)
+        Button(self, text="View Parking Spot", font=TextFont, bg="white", command=loadClientParkingSpot).pack(pady=20)
+        Button(self, text="View Reservation", font=TextFont, bg="white", command=loadClientReservation).pack(pady=20)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(
+            pady=20)
+
+
 # Renter Search Page
-class RenterSearchPage(Frame):
+class SearchPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Find Parking Spot", font=TitleFont)
@@ -203,69 +311,57 @@ class RenterSearchPage(Frame):
         vehicle_type4.grid(row=8, column=2, sticky="w")
 
         def loadSearchPage():
-            res = session.get(baseURL + '/parking/')
+            if not zipcode_entry.get() or not v_type.get():
+                messagebox.showerror('Error', 'Please fill in all * area')
+            else:
+                res = session.get(baseURL + '/parking/')
 
-            if(len(res.json()) == 1 ):
-                controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
-                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
+            if len(res.json()) == 1:
+                controller.frames[ParkingDisplayPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code']
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50")
 
-                if(res.json()[0]['image'] != None):
-                    raw_data = urlopen(baseURL + res.json()[0]['image'] ).read()
+                if res.json()[0]['image'] != None:
+                    raw_data = urlopen(baseURL + res.json()[0]['image']).read()
                     im = Image.open(BytesIO(raw_data))
-                    im = im.resize((200,150), Image.ANTIALIAS)
+                    im = im.resize((200, 150), Image.ANTIALIAS)
                     photo = ImageTk.PhotoImage(im)
-                    controller.frames[SearchingPage].garage1.config(image=photo)
-                    controller.frames[SearchingPage].garage1.image=photo
-                    
+                    controller.frames[ParkingDisplayPage].garage1.config(image=photo)
+                    controller.frames[ParkingDisplayPage].garage1.image = photo
 
-                controller.show_frame(SearchingPage)
+                controller.show_frame(ParkingDisplayPage)
             
-            elif( len(res.json()) == 2):
-                controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
-                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
-                controller.frames[SearchingPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code'] 
-                + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $1.50" )
-                controller.show_frame(SearchingPage)
+            elif len(res.json()) == 2:
+                controller.frames[ParkingDisplayPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code']
+                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50")
+                controller.frames[ParkingDisplayPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code']
+                + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $1.50")
+                controller.show_frame(ParkingDisplayPage)
 
-                if(res.json()[0]['image'] != None):
-                    raw_data1 = urlopen(baseURL + res.json()[0]['image'] ).read()
+                if res.json()[0]['image'] != None:
+                    raw_data1 = urlopen(baseURL + res.json()[0]['image']).read()
                     im1 = Image.open(BytesIO(raw_data1))
-                    im1 = im1.resize((200,150), Image.ANTIALIAS)
+                    im1 = im1.resize((200, 150), Image.ANTIALIAS)
                     photo1 = ImageTk.PhotoImage(im1)
-                    controller.frames[SearchingPage].garage1.config(image=photo1)
-                    controller.frames[SearchingPage].garage1.image=photo1
-                if(res.json()[1]['image'] != None):
-                    raw_data2 = urlopen(baseURL + res.json()[1]['image'] ).read()
+                    controller.frames[ParkingDisplayPage].garage1.config(image=photo1)
+                    controller.frames[ParkingDisplayPage].garage1.image = photo1
+                if res.json()[1]['image'] != None:
+                    raw_data2 = urlopen(baseURL + res.json()[1]['image']).read()
                     im2 = Image.open(BytesIO(raw_data2))
-                    im2 = im2.resize((200,150), Image.ANTIALIAS)
+                    im2 = im2.resize((200, 150), Image.ANTIALIAS)
                     photo2 = ImageTk.PhotoImage(im2)
-                    controller.frames[SearchingPage].garage2.config(image=photo2)
-                    controller.frames[SearchingPage].garage2.image=photo2
+                    controller.frames[ParkingDisplayPage].garage2.config(image=photo2)
+                    controller.frames[ParkingDisplayPage].garage2.image = photo2
                  
             else:
                 messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
 
-
         Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=9, column=2, pady=15, sticky="e")
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=9, column=0, pady=15, sticky="w")
 
-class RenterPage(Frame):
+
+# Renter - Display Parking
+class ParkingDisplayPage(Frame):
     def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
-        label = Label(self, text="Renter Page", font=TitleFont)
-        label.pack(pady=20)
-
-        def loadReservation():
-            pass
-
-        Button(self, text="Search For Parking", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterSearchPage)).pack(pady=20)
-        Button(self, text="View Reservation", font=TextFont, bg="white", command=loadReservation).pack(pady=20)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
-
-
-# Renter - Searching Page
-class SearchingPage(Frame):
-       def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Available Parking", font=TitleFont)
         label.grid(row=0, column=0, columnspan= 2, pady=15)
@@ -323,64 +419,7 @@ class SearchingPage(Frame):
         reserve2 = Button(self, text="Reserve", command=reserve)
         reserve2.grid(row=4, column=1, pady=15, columnspan=3)
 
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterSearchPage)).grid(row=5, column=0, pady=15, columnspan=3)
-
-
-# Client Page
-class ClientPage(Frame):
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
-        label = Label(self, text="Client Page", font=TitleFont)
-        label.pack(pady=20)
-
-        def loadClientParkingSpot():
-            
-            res = session.get(baseURL + '/parking/?client=yes')
-            
-            if(len(res.json()) == 1 ):
-                controller.frames[ParkingSpotPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
-                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
-
-                if(res.json()[0]['image'] != None):
-                    raw_data = urlopen(baseURL + res.json()[0]['image'] ).read()
-                    im = Image.open(BytesIO(raw_data))
-                    im = im.resize((200,150), Image.ANTIALIAS)
-                    photo = ImageTk.PhotoImage(im)
-                    controller.frames[ParkingSpotPage].garage1.config(image=photo)
-                    controller.frames[ParkingSpotPage].garage1.image=photo
-            
-            elif( len(res.json()) == 2):
-                controller.frames[ParkingSpotPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
-                + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
-                controller.frames[SearchingPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code'] 
-                + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $1.50" )
-                controller.show_frame(ParkingSpotPage)
-
-                if(res.json()[0]['image'] != None):
-                    raw_data1 = urlopen(baseURL + res.json()[0]['image'] ).read()
-                    im1 = Image.open(BytesIO(raw_data1))
-                    im1 = im1.resize((200,150), Image.ANTIALIAS)
-                    photo1 = ImageTk.PhotoImage(im1)
-                    controller.frames[ParkingSpotPage].garage1.config(image=photo1)
-                    controller.frames[ParkingSpotPage].garage1.image=photo1
-                if(res.json()[1]['image'] != None):
-                    raw_data2 = urlopen(baseURL + res.json()[1]['image'] ).read()
-                    im2 = Image.open(BytesIO(raw_data2))
-                    im2 = im2.resize((200,150), Image.ANTIALIAS)
-                    photo2 = ImageTk.PhotoImage(im2)
-                    controller.frames[ParkingSpotPage].garage2.config(image=photo2)
-                    controller.frames[ParkingSpotPage].garage2.image=photo2
-
-            controller.show_frame(ParkingSpotPage)
-
-        def loadClientReservation():
-            pass
-
-
-        Button(self, text="Add Parking Spot", font=TextFont, bg="white", command=lambda: controller.show_frame(AddParkingPage)).pack(pady=20)
-        Button(self, text="View Parking Spot", font=TextFont, bg="white", command=loadClientParkingSpot).pack(pady=20)
-        Button(self, text="View Reservation", font=TextFont, bg="white", command=loadClientReservation).pack(pady=20)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(SearchPage)).grid(row=5, column=0, pady=15, columnspan=3)
 
 
 # Client - Add Parking Page
@@ -400,26 +439,24 @@ class AddParkingPage(Frame):
         clicked_end = StringVar()
         clicked_end.set(time_option[0])
 
-
         self.filename = StringVar()
 
         def added():
             # When doing post requests we need to retrieve the csrftoken with a GET request then we can do a POST request
 
-            res = session.get(baseURL + "/parking/") # Retriveing csrftoken 
+            res = session.get(baseURL + "/parking/")  # Retriveing csrftoken
             csrftoken = res.cookies['csrftoken']
             # using csrftoken in POST request
-            data = {'csrfmiddlewaretoken': csrftoken, 'street_address' : street_entry.get().lower(), 'city' : city_entry.get().lower(), 'state' : state_entry.get().lower(), 'zip_code' : zipcode_entry.get(), 'vehicle_type' : v_type.get().lower(), 'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),  'end_date' : end_cal.get_date(), 'end_time': clicked_end.get()}
+            data = {'csrfmiddlewaretoken': csrftoken, 'street_address': street_entry.get().lower(), 'city': city_entry.get().lower(), 'state': state_entry.get().lower(), 'zip_code': zipcode_entry.get(), 'vehicle_type': v_type.get().lower(), 'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),  'end_date': end_cal.get_date(), 'end_time': clicked_end.get()}
  
-            files = {'media' : open(self.filename.get(),'rb')}
+            files = {'media': open(self.filename.get(), 'rb')}
             
-            res = session.post(url=(baseURL+ "/parking/"), data=data, files=files)
-            if(res.json() == "New Spot Created"):
+            res = session.post(url=(baseURL + "/parking/"), data=data, files=files)
+            if res.json() == "New Spot Created":
                 messagebox.showinfo(title="Success", message="Successfully Added Parking Sot")
                 controller.show_frame(ClientPage)
             else:
                 messagebox.showerror("Error", message="Something went wrong with backend server!")
-
 
         def save_png():
             try:
@@ -448,9 +485,6 @@ class AddParkingPage(Frame):
         end_time.grid(row=2, column=2)
 
         # Location - Street, City, State, Zipcode
-        #Label(self, text="House #: ", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
-        #house_entry = Entry(self, font=TextFont)
-        #house_entry.grid(row=3, column=1)
         Label(self, text="Street:*", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
         street_entry = Entry(self, font=TextFont)
         street_entry.grid(row=4, column=1)
@@ -483,7 +517,8 @@ class AddParkingPage(Frame):
 
         Button(self, text="Add", font=TextFont, bg="white", command=added).grid(row=11, column=2, pady=15)
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=11, column=0, pady=15, sticky="e")
-        
+
+
 # Client - Parking Spot
 class ParkingSpotPage(Frame):
     def __init__(self, parent, controller):
@@ -522,9 +557,9 @@ class ParkingSpotPage(Frame):
         self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Hourly Rate: " + hourly_rate)
         self.location1.grid(row=2, column=0, sticky="w")
 
-        modify1 = Button(self, text="Modify", command=lambda : modify(1))
+        modify1 = Button(self, text="Modify", command=lambda: modify(1))
         modify1.grid(row=2, column=2, columnspan=3)
-        delete1 = Button(self, text="Delete", command=lambda : delete(1))
+        delete1 = Button(self, text="Delete", command=lambda: delete(1))
         delete1.grid(row=2, column=5, columnspan=3)
 
         # Parking Garage 2
@@ -534,36 +569,95 @@ class ParkingSpotPage(Frame):
         self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate)
         self.location2.grid(row=4, column=0, sticky="w")
         
-        modify2 = Button(self, text="Modify", command=lambda : modify(2))
+        modify2 = Button(self, text="Modify", command=lambda: modify(2))
         modify2.grid(row=4, column=2, columnspan=3)
-        delete2 = Button(self, text="Delete", command=lambda : delete(2))
-        delete2.grid(row=4, column=5,columnspan=3)
+        delete2 = Button(self, text="Delete", command=lambda: delete(2))
+        delete2.grid(row=4, column=5, columnspan=3)
 
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=5, column=0, pady=15, columnspan=3)
 
-    
-        
-# Reservation page
-class ReservationPage(Frame):
+
+# Client - Reservation page
+class ClientReservationPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="Reservation", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        address1 = ""
-        availabletime1 = ""
-        total = "$20.45"
+        garage = Image.open("no_image.png").resize((200, 150))
+        garage_img = ImageTk.PhotoImage(garage)
 
-        
-        self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Total: " + total).grid(row=2, column=0, columnspan=2)
+        rentername = "N/A"
+        address = "N/A"
+        timeseleted = "N/A"
+        total = ""
 
+        self.garage1 = Label(self, image=garage_img)
+        self.garage1.image = garage_img
+        self.garage1.grid(row=1, column=0, pady=15)
+        resv_label = Label(self, text="Renter: " + rentername + "Location: " + address + "\n" + "Time: " + timeseleted + "\n" + "Total: " + total)
+        resv_label.grid(row=2, column=0, columnspan=2)
         Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
         Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
 
         Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=4, column=0, pady=15, columnspan=2)
 
-        
-        
+
+# Account Page
+class AccountPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="Account", font=TitleFont)
+        label.pack(pady=20)
+
+        #  View Account
+        view_button = Button(self, text="View Account", font=TextFont, bg="white", command=lambda: controller.show_frame(ViewAcctPage))
+        view_button.pack(pady=20)
+        # Update Account
+        edit_button = Button(self, text="Update Account", font=TextFont, bg="white", command=lambda: controller.show_frame(AcctUpdatePage))
+        edit_button.pack(pady=20)
+        # Delete Account
+        delete_button = Button(self, text="Delete Account", font=TextFont, bg="white", command=lambda: controller.show_frame(AcctDeletePage))
+        delete_button.pack(pady=20)
+
+
+# View Account Page
+class ViewAcctPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        label = Label(self, text="View", font=TitleFont)
+        label.grid(row=0, column=0, pady=20, sticky="e")
+
+        fn_display = "N/A"
+        ln_display = "N/A"
+        email_display = "N/A"
+        phone_display = "N/A"
+        bank_display = "N/A"
+        routing_display = "N/A"
+        account_display = "N/A"
+
+        # First Name
+        Label(self, text="First Name: " + fn_display, font=TextFont).grid(row=1, column=0, pady=5, sticky="e")
+
+        # Last Name
+        Label(self, text="Last Name: " + ln_display, font=TextFont).grid(row=3, column=0, pady=5, sticky="e")
+
+        # Email
+        Label(self, text="Email Address: " + email_display, font=TextFont).grid(row=4, column=0, pady=5, sticky="e")
+
+        # Phone Number
+        Label(self, text="Phone#: " + phone_display, font=TextFont).grid(row=5, column=0, pady=5, sticky="e")
+
+        # Bank Info
+        Label(self, text="Bank Name: " + bank_display, font=TextFont).grid(row=8, column=0, pady=5, sticky="e")
+
+        # Routing Number
+        Label(self, text="Routing Number: " + routing_display, font=TextFont).grid(row=9, column=0, sticky="e")
+
+        # Account Number
+        Label(self, text="Account Number: " + account_display, font=TextFont).grid(row=10, column=0, pady=5, sticky="e")
+
+
 # Update Account page
 class AcctUpdatePage(Frame):
     def __init__(self, parent, controller):
@@ -574,18 +668,18 @@ class AcctUpdatePage(Frame):
 
         def update():
 
-            res = session.get(baseURL + "/users/update/") # Retriveing csrftoken 
+            res = session.get(baseURL + "/users/update/")  # Retrieving csrftoken
             csrftoken = res.cookies['csrftoken']
 
-            res = session.post(baseURL + '/users/update/', data={ 'csrfmiddlewaretoken': csrftoken, 'first_name': fn_entry.get(), 'last_name': ln_entry.get(), 
-            'email' : email_entry.get(), 'phone': phone_entry.get(), 'bank_name' : bank_entry.get(), 'routing' : routing_entry.get(),
-            'account' : account_entry.get()
+            res = session.post(baseURL + '/users/update/', data={'csrfmiddlewaretoken': csrftoken, 'first_name': fn_entry.get(), 'last_name': ln_entry.get(),
+            'email': email_entry.get(), 'phone': phone_entry.get(), 'bank_name': bank_entry.get(), 'routing': routing_entry.get(),
+            'account': account_entry.get()
              })
 
-            if(res.json() == "User Updated"): 
+            if res.json() == "User Updated":
                 messagebox.showinfo(title="Success", message="Account has been!")
                 newRes = session.get(baseURL + '/users/')  # GET Request to retrieve user info after update
-                controller.frames[UserPage].label.config(text="Welcome " + newRes.json()['first_name'] + "!") # Update the Welcome Label in UserPage with the user's name
+                controller.frames[UserPage].label.config(text="Welcome " + newRes.json()['first_name'] + "!")  # Update the Welcome Label in UserPage with the user's name
                 #### Make other updates to user's account 
                 ###
                 ###
@@ -593,7 +687,6 @@ class AcctUpdatePage(Frame):
                 controller.show_frame(UserPage)
             else:
                 messagebox.showerror("Error", message="Something went wrong with backend server!")
-            
 
         # First Name
         Label(self, text="First Name:", font=TextFont).grid(row=2, column=0, pady=5, sticky="e")
@@ -648,21 +741,18 @@ class AcctDeletePage(Frame):
 
         def deleteAcc():
             pass
-            res = session.get(baseURL + "/users/delete/") # Retriveing csrftoken 
+            res = session.get(baseURL + "/users/delete/")  # Retrieving csrftoken
             csrftoken = res.cookies['csrftoken']
 
-            res = session.post(baseURL + '/users/delete/', data={'csrfmiddlewaretoken' : csrftoken})
-            if(res.json() == "User Deleted"):
+            res = session.post(baseURL + '/users/delete/', data={'csrfmiddlewaretoken': csrftoken})
+            if res.json() == "User Deleted":
                 messagebox.showinfo(title="Deleted", message="User Account Is Deleted")
                 controller.show_frame(LoginPage)
             else:
                 messagebox.showerror("Error", message="Something went wrong with backend server!")
-
         
         Button(self, text="Confirm Delete", font=TextFont, bg="white", command=deleteAcc).pack(pady=20)
         Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).pack(pady=20)
-
-        
 
 
 # Monthly Report Page
@@ -700,17 +790,15 @@ class SignUpPage(Frame):
                             messagebox.showerror('Error', message='Email enter is increase!')
             else:
                 
-                data = {'first_name' : fn_entry.get(), 'last_name': ln_entry.get(), 'email': email_entry.get(), 'password' : pw_entry.get(),
-                'phone': phone_entry.get(), 'bank_name' : bank_entry.get(), 'routing' : routing_entry.get(), 'account' : account_entry.get()
-                }
+                data = {'first_name': fn_entry.get(), 'last_name': ln_entry.get(), 'email': email_entry.get(), 'password': pw_entry.get(),
+                'phone': phone_entry.get(), 'bank_name': bank_entry.get(), 'routing': routing_entry.get(), 'account': account_entry.get()}
                 res = session.post(baseURL + '/users/signup/', data)
                 
-                if(res.json() == "New User Created"):
+                if res.json() == "New User Created":
                     messagebox.showinfo(title="Success", message="Successfully Signed Up")
                     controller.show_frame(LoginPage) 
                 else:
                     messagebox.showerror('Error', message='Something went wrong in the backend')
-
 
         Label(self, text="*Please fill in this form to create an account:", font=("Times", 15)).grid(row=1, column=0, columnspan=2, pady=5, sticky="nw")
 
