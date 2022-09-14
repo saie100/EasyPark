@@ -1,4 +1,5 @@
 import email
+from email.mime import base
 from http.client import CannotSendRequest
 from tkinter import *
 
@@ -37,7 +38,7 @@ class EasyPark(Tk):
 
         self.frames = {}
 
-        for F in (LoginPage, UserPage, SignUpPage, RenterPage, RenterSearchPage, ClientPage, AddParkingPage, ReservationPage, 
+        for F in (LoginPage, AdminPage, AdminControl, UserPage, SignUpPage, RenterPage, RenterSearchPage, ClientPage, AddParkingPage, ReservationPage, 
                   AcctUpdatePage, AcctDeletePage, ReportPage, SearchingPage, ParkingSpotPage):
             frame = F(container, self)
             self.frames[F] = frame
@@ -70,6 +71,9 @@ class LoginPage(Frame):
                 res = session.get(baseURL + '/users/')  # GET Request to retrieve user info after authentication
                 controller.frames[UserPage].label.config(text="Welcome " + res.json()['first_name'] + "!") # Update the Welcome Label in UserPage with the user's name
                 controller.show_frame(UserPage) # Display UserPage
+
+            elif(res.json() == "Admin Logged In"):
+                controller.show_frame(AdminPage) # Display AdminPage
 
             elif(res.json() == "Wrong Credentials"):
                 messagebox.showerror('Error', message="Incorrect Credentials")
@@ -106,6 +110,82 @@ class LoginPage(Frame):
         button2 = Button(self, text="Sign Up", font=TextFont, bg="white", command=lambda: controller.show_frame(SignUpPage))
         button2.pack(side=LEFT)
 
+
+class AdminPage(Frame):
+    def __init__(self, parent, controller):
+        
+        Frame.__init__(self, parent)
+        self.label = Label(self, text="Admin Page", font=TitleFont)
+        self.label.pack(padx=5, pady=5)
+        
+        def logoff():
+            res = session.get(baseURL + '/users/signout/')
+
+            if(res.json() == "Logged out"):
+                controller.show_frame(LoginPage) 
+            else:
+                messagebox.showerror('Error', message='Something went wrong in the backend')
+            
+        def loadAdminSetting():
+
+            res = session.get(baseURL + '/parking/admin/')
+            if(res.json() == "Hourly rate does not exist"):
+                messagebox.showinfo(title="Hourly Rate", message="Hourly rate needs to be set")
+                controller.show_frame(AdminControl)
+            elif(res.json()['hourly_rate']):
+                controller.frames[AdminControl].label1.config(text="Current hourly rate: " + res.json()['hourly_rate'])
+                controller.show_frame(AdminControl)
+            else:
+                messagebox.showerror('Error', message='Something went wrong in the backend')
+
+
+        # Admin Settings
+        setprice = Button(self, text="Set Price", font=TextFont, bg="white", command=loadAdminSetting)
+        setprice.pack(padx=5, pady=20)
+        # Log Off
+        logoff_button = Button(self, text="Log Off", font=TextFont, bg="white", command=logoff) 
+        logoff_button.pack(padx=5, pady=20)
+
+class AdminControl(Frame):
+    def __init__(self, parent, controller):
+        
+        Frame.__init__(self, parent)
+        self.label = Label(self, text="Admin Settings", font=TitleFont)
+        self.label.pack(padx=5, pady=5)
+        
+
+        def setPrice():
+            res = session.get(baseURL + '/parking/admin/') # Retriveing csrftoken 
+            csrftoken = res.cookies['csrftoken']
+            # using csrftoken in POST request
+            print(self.price_entry.get())
+            data = {'csrfmiddlewaretoken': csrftoken, 'hourly_rate' : self.price_entry.get()}
+
+            res = session.post(baseURL + '/parking/admin/', data=data)
+            print(res.json())
+            if(res.json() == "Updated hourly rate"):
+                messagebox.showinfo(title="Success!", message="Hourly rate has been updated")
+                controller.show_frame(AdminPage)
+            elif(res.json() == "Created new hourly rate"):
+                messagebox.showinfo(title="Success!", message="Hourly rate has been created")
+                controller.show_frame(AdminPage)
+            else:
+                messagebox.showerror('Error', message='Something went wrong in the backend')
+
+
+
+        self.label1 = Label(self, text="Current hourly rate: N/A", font=TextFont)
+        self.label1.pack(padx=5, pady=5)
+
+        Label(self, text="Set hourly rate:", fg="black", border=0, font=TextFont).pack(padx=5, pady=5)
+        self.price_entry = Entry(self, font=TextFont)
+        self.price_entry.pack(padx=5, pady=5)
+        
+        setprice_btn = Button(self, text="Set Price", font=TextFont, bg="white", command=setPrice)
+        setprice_btn.pack(padx=5, pady=20)
+        # Back to Admin Page
+        back_btn= Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(AdminPage)) 
+        back_btn.pack(padx=5, pady=20)
 
 # User Page - after signing in
 class UserPage(Frame):
@@ -154,8 +234,11 @@ class RenterSearchPage(Frame):
                        "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
                        "20:00", "21:00", "22:00", "23:00"]
 
-        clicked = StringVar()
-        clicked.set(time_option[0])
+        start_clicked = StringVar()
+        start_clicked.set(time_option[0])
+
+        end_clicked = StringVar()
+        end_clicked.set(time_option[0])
 
         v_type = StringVar()
 
@@ -163,14 +246,14 @@ class RenterSearchPage(Frame):
         Label(self, text="Start Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
         start_cal = DateEntry(self, selectmode='day')
         start_cal.grid(row=1, column=1)
-        start_time = OptionMenu(self, clicked, *time_option)
+        start_time = OptionMenu(self, start_clicked, *time_option)
         start_time.grid(row=1, column=2)
 
         # End Date & Time
         Label(self, text="End Day & Time:*", font=TextFont).grid(row=2, column=0, pady=15, sticky="e")
         end_cal = DateEntry(self, selectmode='day')
         end_cal.grid(row=2, column=1)
-        end_time = OptionMenu(self, clicked, *time_option)
+        end_time = OptionMenu(self, end_clicked, *time_option)
         end_time.grid(row=2, column=2)
 
         # Location
@@ -203,12 +286,15 @@ class RenterSearchPage(Frame):
         vehicle_type4.grid(row=8, column=2, sticky="w")
 
         def loadSearchPage():
-            res = session.get(baseURL + '/parking/')
+            res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get() +'/'+str(end_cal.get_date())+':'+end_clicked.get())
 
             if(len(res.json()) == 1 ):
                 controller.frames[SearchingPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
                 + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
 
+                controller.frames[SearchingPage].spot_id1.set(res.json()[0]['id'])
+                controller.frames[SearchingPage].client_id1.set(res.json()[0]['client_id'])
+                
                 if(res.json()[0]['image'] != None):
                     raw_data = urlopen(baseURL + res.json()[0]['image'] ).read()
                     im = Image.open(BytesIO(raw_data))
@@ -226,6 +312,11 @@ class RenterSearchPage(Frame):
                 controller.frames[SearchingPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code'] 
                 + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $1.50" )
                 controller.show_frame(SearchingPage)
+
+                controller.frames[SearchingPage].spot_id1.set(res.json()[0]['id'])
+                controller.frames[SearchingPage].client_id1.set(res.json()[0]['client_id'])
+                controller.frames[SearchingPage].spot_id2.set(res.json()[1]['id'])
+                controller.frames[SearchingPage].client_id2.set(res.json()[1]['client_id'])
 
                 if(res.json()[0]['image'] != None):
                     raw_data1 = urlopen(baseURL + res.json()[0]['image'] ).read()
@@ -270,9 +361,33 @@ class SearchingPage(Frame):
         label = Label(self, text="Available Parking", font=TitleFont)
         label.grid(row=0, column=0, columnspan= 2, pady=15)
 
-        def reserve():
-            messagebox.showinfo(title="Success", message="Your parking spot is successfully reserved.")
-            controller.show_frame(UserPage)
+        def reserve(spotNum):
+            
+            if(spotNum == 1):
+                spot_id = self.spot_id1.get()
+                client_id = self.client_id1.get()
+                start_time = self.start_clicked1.get()
+                end_time = self.end_clicked1.get()
+                
+            else:
+                spot_id = self.spot_id2.get()
+                client_id = self.client_id2.get()
+                start_time = self.start_clicked2.get()
+                end_time = self.end_clicked2.get()
+
+                
+            res = session.get(baseURL + '/parking/reserve/') # Retriveing csrftoken 
+            csrftoken = res.cookies['csrftoken']
+            # using csrftoken in POST request
+            data = {'csrfmiddlewaretoken': csrftoken, 'client_id' : client_id, 'parking_spot_id' : spot_id, 'start_time' : start_time, 'end_time' : end_time }
+            res = session.post(baseURL + '/parking/reserve/', data=data)
+
+            if(res.json() == "Reservation Created"):
+                messagebox.showinfo(title="Success", message="Your parking spot is successfully reserved.")
+                controller.show_frame(UserPage)
+            else:
+                messagebox.showerror("Error", message="Something went wrong with backend server!")
+               
 
         address1 = "N/A"
         address2 = "N/A"
@@ -290,37 +405,50 @@ class SearchingPage(Frame):
         time_option = ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00",
                        "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
                        "20:00", "21:00", "22:00", "23:00"]
-        start_clicked = StringVar()
-        start_clicked.set(time_option[0])
-        end_clicked = StringVar()
-        end_clicked.set(time_option[0])
 
+        self.start_clicked1 = StringVar()
+        self.start_clicked1.set(time_option[0])
+        self.end_clicked1 = StringVar()
+        self.end_clicked1.set(time_option[0])
+
+
+        self.start_clicked2 = StringVar()
+        self.start_clicked2.set(time_option[0])
+        self.end_clicked2 = StringVar()
+        self.end_clicked2.set(time_option[0])
+
+        self.spot_id1 = IntVar() # This id is used for identifying parking spot #1 in the database
+        self.spot_id2 = IntVar() # This id is used for identifying parking spot #2 in the database
+        self.client_id1 = IntVar() # This id is used for identifying the owner of spot #1 in the database
+        self.client_id2 = IntVar()# This id is used for identifying the owner of spot #2 in the database
+        
+        
         # Parking Garage 1
         self.garage1 = Label(self, image=garage1_img)
         self.garage1.image = garage1_img
         self.garage1.grid(row=1, column=0, pady=15)
-        start_time1 = OptionMenu(self, start_clicked, *time_option)
+        start_time1 = OptionMenu(self, self.start_clicked1, *time_option)
         start_time1.grid(row=1, column=1)
         Label(self, text="   to   ").grid(row=1, column=2)
-        end_time1 = OptionMenu(self, end_clicked, *time_option)
+        end_time1 = OptionMenu(self, self.end_clicked1, *time_option)
         end_time1.grid(row=1, column=3)
         self.location1 = Label(self, text="Location: " + address1 + "\n" + "Time: " + availabletime1 + "\n" + "Hourly Rate: " + hourly_rate)
         self.location1.grid(row=2, column=0, sticky="w")
-        reserve1 = Button(self, text="Reserve", command=reserve)
+        reserve1 = Button(self, text="Reserve", command=lambda: reserve(1))
         reserve1.grid(row=2, column=1, pady=15, columnspan=3)
 
         # Parking Garage 2
         self.garage2 = Label(self, image=garage2_img)
         self.garage2.image = garage2_img
         self.garage2.grid(row=3, column=0, pady=15)
-        start_time1 = OptionMenu(self, start_clicked, *time_option)
+        start_time1 = OptionMenu(self, self.start_clicked2, *time_option)
         start_time1.grid(row=3, column=1)
         Label(self, text="   to   ").grid(row=3, column=2)
-        end_time1 = OptionMenu(self, end_clicked, *time_option)
+        end_time1 = OptionMenu(self, self.end_clicked2, *time_option)
         end_time1.grid(row=3, column=3)
         self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate)
         self.location2.grid(row=4, column=0, sticky="w")
-        reserve2 = Button(self, text="Reserve", command=reserve)
+        reserve2 = Button(self, text="Reserve", command=lambda: reserve(2))
         reserve2.grid(row=4, column=1, pady=15, columnspan=3)
 
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterSearchPage)).grid(row=5, column=0, pady=15, columnspan=3)
@@ -647,7 +775,6 @@ class AcctDeletePage(Frame):
         label.pack(pady=20)
 
         def deleteAcc():
-            pass
             res = session.get(baseURL + "/users/delete/") # Retriveing csrftoken 
             csrftoken = res.cookies['csrftoken']
 

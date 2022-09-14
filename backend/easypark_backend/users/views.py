@@ -59,7 +59,10 @@ class SignIn(viewsets.ModelViewSet):
         if(user is not None):
             login(request, user)
             request.session.modified = True
-            resp = Response("User Logged In")
+            if(user.is_superuser):
+                resp = Response("Admin Logged In")
+            else:
+                resp = Response("User Logged In")
             return resp
         else:
             return Response("Wrong Credentials")

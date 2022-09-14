@@ -1,4 +1,5 @@
 from distutils.command.upload import upload
+from tkinter.tix import Tree
 from django.db import models
 from users.models import User
 
@@ -21,11 +22,17 @@ class ParkingSpot(models.Model):
     class Meta:
         ordering = ['-date_updated']
 
+class AdminSetting(models.Model):
+    hourly_rate = models.CharField(max_length=100, default="1.50", blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
 
 class Reservations(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='client', blank=True, null=False)
     renter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='renter', blank=True, null=False)
-    time_slot_usage = models.IntegerField() # In increments of hours
+    start_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True)
     parking_spot = models.ForeignKey(ParkingSpot, on_delete=models.CASCADE, blank=True, null=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
