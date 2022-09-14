@@ -35,11 +35,11 @@ class EasyPark(Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        self.frames = {LoginPage, UserPage, RenterPage, RenterReservationPage,  ClientPage,  SearchPage,
-                       ParkingDisplayPage, AddParkingPage, ParkingSpotPage, ClientReservationPage, AccountPage,
-                       AccountPage, ViewAcctPage, AcctUpdatePage, AcctDeletePage, ReportPage, SignUpPage}
+        self.frames = {}
 
-        for F in ():
+        for F in (LoginPage, UserPage, RenterPage, RenterReservationPage,  ClientPage,  SearchPage, ParkingDisplayPage,
+                  AddParkingPage, ParkingSpotPage, ClientReservationPage, AccountPage, AccountPage, ViewAcctPage,
+                  AcctUpdatePage, AcctDeletePage, ReportPage, SignUpPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
