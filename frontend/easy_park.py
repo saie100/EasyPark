@@ -619,7 +619,9 @@ class AccountPage(Frame):
         # Delete Account
         delete_button = Button(self, text="Delete Account", font=TextFont, bg="white", command=lambda: controller.show_frame(AcctDeletePage))
         delete_button.pack(pady=20)
-
+        
+        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).pack(pady=20)
+                
 
 # View Account Page
 class ViewAcctPage(Frame):
@@ -637,25 +639,27 @@ class ViewAcctPage(Frame):
         account_display = "N/A"
 
         # First Name
-        Label(self, text="First Name: " + fn_display, font=TextFont).grid(row=1, column=0, pady=5, sticky="e")
+        Label(self, text="First Name: " + fn_display, font=TextFont).grid(row=1, column=0, pady=10)
 
         # Last Name
-        Label(self, text="Last Name: " + ln_display, font=TextFont).grid(row=3, column=0, pady=5, sticky="e")
+        Label(self, text="Last Name: " + ln_display, font=TextFont).grid(row=2, column=0, pady=10)
 
         # Email
-        Label(self, text="Email Address: " + email_display, font=TextFont).grid(row=4, column=0, pady=5, sticky="e")
+        Label(self, text="Email Address: " + email_display, font=TextFont).grid(row=3, column=0, pady=10)
 
         # Phone Number
-        Label(self, text="Phone#: " + phone_display, font=TextFont).grid(row=5, column=0, pady=5, sticky="e")
+        Label(self, text="Phone#: " + phone_display, font=TextFont).grid(row=4, column=0, pady=10)
 
         # Bank Info
-        Label(self, text="Bank Name: " + bank_display, font=TextFont).grid(row=8, column=0, pady=5, sticky="e")
+        Label(self, text="Bank Name: " + bank_display, font=TextFont).grid(row=5, column=0, pady=10)
 
         # Routing Number
-        Label(self, text="Routing Number: " + routing_display, font=TextFont).grid(row=9, column=0, sticky="e")
+        Label(self, text="Routing Number: " + routing_display, font=TextFont).grid(row=8, column=0, pady=10)
 
         # Account Number
-        Label(self, text="Account Number: " + account_display, font=TextFont).grid(row=10, column=0, pady=5, sticky="e")
+        Label(self, text="Account Number: " + account_display, font=TextFont).grid(row=7, column=0, pady=10)
+        
+        Button(self, text="Back", command=lambda: controller.show_frame(AccountPage), font=TextFont).grid(row=8, column=0, pady=10)
 
 
 # Update Account page
@@ -728,7 +732,7 @@ class AcctUpdatePage(Frame):
         account_entry = Entry(self, font=TextFont)
         account_entry.grid(row=10, column=1, sticky="w")
 
-        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).grid(row=11, column=0)
+        Button(self, text="Back", command=lambda: controller.show_frame(AccountPage), font=TextFont).grid(row=11, column=0)
         Button(self, text="Confirm Update", font=TextFont, bg="white", command=update).grid(row=11, column=1, padx=10, pady=10)
 
 
@@ -752,7 +756,7 @@ class AcctDeletePage(Frame):
                 messagebox.showerror("Error", message="Something went wrong with backend server!")
         
         Button(self, text="Confirm Delete", font=TextFont, bg="white", command=deleteAcc).pack(pady=20)
-        Button(self, text="Back", command=lambda: controller.show_frame(UserPage), font=TextFont).pack(pady=20)
+        Button(self, text="Back", command=lambda: controller.show_frame(AccountPage), font=TextFont).pack(pady=20)
 
 
 # Monthly Report Page
