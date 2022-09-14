@@ -164,7 +164,7 @@ class ClientPage(Frame):
 
             res = session.get(baseURL + '/parking/?client=yes')
 
-            if len(res.json()) == 1:
+            if (len(res.json()) == 1):
                 controller.frames[ParkingSpotPage].location1.config(
                     text="Location: " + res.json()[0]['street_address'] + ", " + res.json()[0]['city'] + ", " +
                          res.json()[0]['state'] + " " + res.json()[0]['zip_code']
@@ -235,7 +235,7 @@ class RenterReservationPage(Frame):
         self.garage1 = Label(self, image=garage_img)
         self.garage1.image = garage_img
         self.garage1.grid(row=1, column=0, pady=15, columnspan=2)
-        resv_label = Label(self, text="Client: " + clientname + "\n" + "Location: " + address + "\n" + "Time: " + timeseleted + "\n" + "Total: " + total)
+        resv_label = Label(self, text="Owner of Parking Spot: " + clientname + "\n" + "Location: " + address + "\n" + "Time Slot: " + timeseleted + "\n" + "Total: $0.00" + total)
         resv_label.grid(row=2, column=0, columnspan=2)
         Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
         Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
@@ -759,7 +759,7 @@ class ViewAcctPage(Frame):
         # Account Number
         Label(self, text="Account Number: " + account_display, font=TextFont).pack(pady=10)
         
-        Button(self, text="Back", command=lambda: controller.show_frame(AccountPage, bg="white"), font=TextFont).pack(pady=10)
+        Button(self, text="Back", command=lambda: controller.show_frame(AccountPage), font=TextFont).pack(pady=10)
 
 
 # Update Account page
