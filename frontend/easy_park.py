@@ -311,25 +311,37 @@ class RenterReservationPage(Frame):
         label = Label(self, text="Reservation", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        garage = Image.open("no_image.png").resize((200, 150))
-        garage_img = ImageTk.PhotoImage(garage)
+        garage1 = Image.open("no_image.png").resize((200, 150))
+        garage_img1 = ImageTk.PhotoImage(garage1)
 
-        clientname = "N/A"
-        address = "N/A"
-        timeseleted = "N/A"
-        total = ""
+        garage2 = Image.open("no_image.png").resize((200, 150))
+        garage_img2 = ImageTk.PhotoImage(garage2)
 
-        self.garage1 = Label(self, image=garage_img)
-        self.garage1.image = garage_img
-        self.garage1.grid(row=1, column=0, pady=15, columnspan=2)
-        
-        self.resv_label = Label(self, text="Owner of Parking Spot: " + clientname + "\n" + "Location: " + address + "\n" + "Time Slot: " + timeseleted + "\n" + "Total: $0.00" + total)
-        self.resv_label.grid(row=2, column=0, columnspan=2)
-        
-        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
-        Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+        clientname1 = "N/A"
+        address1 = "N/A"
+        timeseleted1 = "N/A"
+        total1 = "$0.00"
 
-        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=4, column=0, pady=15, columnspan=2)
+        clientname2 = "N/A"
+        address2 = "N/A"
+        timeseleted2 = "N/A"
+        total2 = "$0.00"
+
+        self.garage1 = Label(self, image=garage_img1)
+        self.garage1.image = garage_img1
+        self.garage1.grid(row=1, column=0, pady=15)
+        resv_label = Label(self, font=TextFont, text="Owner of Parking Spot: " + clientname1 + "\n" + "Location: " + address1 + "\n" + "Time Slot: " + timeseleted1 + "\n" + "Total: " + total1)
+        resv_label.grid(row=2, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=2, column=1, pady=15, padx=10)
+
+        self.garage2 = Label(self, image=garage_img2)
+        self.garage2.image = garage_img2
+        self.garage2.grid(row=3, column=0, pady=15)
+        resv_label = Label(self, font=TextFont, text="Owner of Parking Spot: " + clientname2 + "\n" + "Location: " + address2 + "\n" + "Time Slot: " + timeseleted2 + "\n" + "Total: " + total2)
+        resv_label.grid(row=4, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=4, column=1, pady=15, padx=10)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=5, column=0, pady=15, columnspan=2)
 
 
 # Renter Search Page
@@ -449,7 +461,7 @@ class SearchPage(Frame):
                     messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
 
         Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=9, column=2, pady=15, sticky="e")
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=9, column=0, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=9, column=0, pady=15, sticky="w")
 
 
 # Renter - Display Parking
@@ -658,7 +670,7 @@ class ParkingSpotPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="My Parking Spots", font=TitleFont)
-        label.grid(row=0, column=0, columnspan= 2, pady=15)
+        label.grid(row=0, column=0, columnspan=3, pady=15)
 
         def delete(spotNum):
             messagebox.showinfo(title="Success", message="Parking Spot Deleted")
@@ -701,7 +713,7 @@ class ParkingSpotPage(Frame):
         self.garage2.image = garage2_img
         self.garage2.grid(row=3, column=0, pady=15)
         self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate)
-        self.location2.grid(row=4, column=0, sticky="w")
+        self.location2.grid(row=4, column=0)
         
         modify2 = Button(self, text="Modify", command=lambda: modify(2), bg="white", font=TextFont)
         modify2.grid(row=4, column=1)
@@ -811,7 +823,7 @@ class ModifySpotPage(Frame):
         Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=10, column=1, pady=15)
 
         Button(self, text="Save", font=TextFont, bg="white", command=added).grid(row=11, column=2, pady=15)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ParkingSpotPage)).grid(
             row=11, column=0, pady=15, sticky="e")
 
 
@@ -822,23 +834,37 @@ class ClientReservationPage(Frame):
         label = Label(self, text="Reservation", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        garage = Image.open("no_image.png").resize((200, 150))
-        garage_img = ImageTk.PhotoImage(garage)
+        garage1 = Image.open("no_image.png").resize((200, 150))
+        garage_img1 = ImageTk.PhotoImage(garage1)
 
-        rentername = "N/A"
-        address = "N/A"
-        timeseleted = "N/A"
-        total = "N/A"
+        garage2 = Image.open("no_image.png").resize((200, 150))
+        garage_img2 = ImageTk.PhotoImage(garage2)
 
-        self.garage1 = Label(self, image=garage_img)
-        self.garage1.image = garage_img
-        self.garage1.grid(row=1, column=0, pady=15, columnspan=2)
-        resv_label = Label(self, text="Renter: " + rentername + "\n" + "Location: " + address + "\n" + "Time: " + timeseleted + "\n" + "Total: " + total)
-        resv_label.grid(row=2, column=0, columnspan=2)
-        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
-        Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+        rentername1 = "N/A"
+        address1 = "N/A"
+        timeseleted1 = "N/A"
+        totalhrs1 = "0"
 
-        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=4, column=0, pady=15, columnspan=2)
+        rentername2 = "N/A"
+        address2 = "N/A"
+        timeseleted2 = "N/A"
+        totalhrs2 = "0"
+
+        self.garage1 = Label(self, image=garage_img1)
+        self.garage1.image = garage_img1
+        self.garage1.grid(row=1, column=0, pady=15)
+        resv_label = Label(self, font=TextFont, text="Renter: " + rentername1 + "\n" + "Location: " + address1 + "\n" + "Time: " + timeseleted1 + "\n" + "Total hours: " + totalhrs1)
+        resv_label.grid(row=2, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=2, column=1, pady=15, padx=10)
+
+        self.garage2 = Label(self, image=garage_img2)
+        self.garage2.image = garage_img2
+        self.garage2.grid(row=3, column=0, pady=15)
+        resv_label = Label(self, font=TextFont, text="Renter: " + rentername2 + "\n" + "Location: " + address2 + "\n" + "Time: " + timeseleted2 + "\n" + "Total hours: " + totalhrs2)
+        resv_label.grid(row=4, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=4, column=1, pady=15, padx=10)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=5, column=0, pady=15, columnspan=2)
 
 
 # Account Page
