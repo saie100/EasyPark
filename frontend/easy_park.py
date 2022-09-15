@@ -480,20 +480,14 @@ class SearchPage(Frame):
         end_clicked = StringVar()
         end_clicked.set(time_option[0])
 
-        # Start Date & Time
-        Label(self, text="Start Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
+        # Date & Time
+        Label(self, text="Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
         start_cal = DateEntry(self, selectmode='day')
         start_cal.grid(row=1, column=1)
         start_time = OptionMenu(self, start_clicked, *time_option)
         start_time.grid(row=1, column=2)
 
-        # End Date & Time
-        Label(self, text="End Day & Time:*", font=TextFont).grid(row=2, column=0, pady=15, sticky="e")
-        end_cal = DateEntry(self, selectmode='day')
-        end_cal.grid(row=2, column=1)
-        end_time = OptionMenu(self, end_clicked, *time_option)
-        end_time.grid(row=2, column=2)
-
+        
         # Location
         Label(self, text="Street:", font=TextFont).grid(row=3, column=0, pady=15, sticky="e")
         street_entry = Entry(self, font=TextFont)
@@ -513,11 +507,11 @@ class SearchPage(Frame):
 
 
         def loadSearchPage():
-            res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get() +'/'+str(end_cal.get_date())+':'+end_clicked.get())
-            if not zipcode_entry.get() or not start_cal.get() or not end_cal.get():
+            res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get())
+            if not zipcode_entry.get() or not start_cal.get():
                 messagebox.showerror('Error', 'Please fill in all * area')
             else:
-                res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get() +'/'+str(end_cal.get_date())+':'+end_clicked.get())
+                res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get())
                 rate = session.get(baseURL + '/parking/admin/')
                 if len(res.json()) == 1:
                     controller.frames[ParkingDisplayPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code']

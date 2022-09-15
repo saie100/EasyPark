@@ -61,17 +61,17 @@ class ParkingSpotView(viewsets.ModelViewSet):
             #print(request.GET.get('date') )
             
             if(request.GET.get('date')):
-                start_end_date = request.GET.get('date')
+                new_date = request.GET.get('date')
                 
-                start_date = start_end_date.split("/")[0]
-                end_date = start_end_date.split("/")[1]
+                print(new_date)
+                type(new_date)
+                
 
-                start = datetime.strptime(start_date+":00", "%Y-%m-%d:%H:%M:%S")
-                end = datetime.strptime(end_date+":00", "%Y-%m-%d:%H:%M:%S")
+                date = datetime.strptime(str(new_date)+":00", "%Y-%m-%d:%H:%M:%S")
 
-                execluded_spot = Reservations.objects.filter(end_date__gte=start).values_list('parking_spot', flat=True)
+                execluded_spot = Reservations.objects.filter(end_date__gte=new_date).values_list('parking_spot', flat=True)
                 new_query = ParkingSpot.objects.exclude(id__in=list(execluded_spot))
-                new_query = new_query.filter(end_date__gte=end)
+                new_query = new_query.filter(start_date__lte=date, end_date__gte=date)
                 self.queryset = new_query.order_by('-start_date')[:2]
             
                 return Response(self.serializer_class(self.queryset, many=True).data)
