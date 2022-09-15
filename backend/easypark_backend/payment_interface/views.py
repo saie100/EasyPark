@@ -19,14 +19,13 @@ class PaymentInterfaceView(viewsets.ModelViewSet):
         bank_name = request.data['bank_name']
         routing_number = request.data['routing_number']
         account_number = request.data['account_number']
-        amount = request.data['amount']
 
-        new_spot = PaymentInterface.objects.create(bank_name=bank_name,routing_number=routing_number,account_number=account_number,amount=amount)
+        new_spot = PaymentInterface.objects.create(user=request.user, bank_name=bank_name,routing_number=routing_number,account_number=account_number)
         new_spot.save()
         Response("New Payment Created")
 
     def list(self, request):
         
-        self.queryset = PaymentInterface.objects.all()
-        return Response(self.serializer_class(self.queryset, many=True).data)
+        self.queryset = PaymentInterface.objects.get(user=request.user)
+        return Response(self.serializer_class(self.queryset, many=False).data)
 

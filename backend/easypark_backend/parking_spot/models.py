@@ -23,7 +23,7 @@ class ParkingSpot(models.Model):
         ordering = ['-date_updated']
 
 class AdminSetting(models.Model):
-    hourly_rate = models.CharField(max_length=100, default="1.50", blank=True, null=True)
+    hourly_rate = models.CharField(max_length=100, default="N/A", blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 

@@ -1,3 +1,4 @@
+from cgitb import text
 import email
 from email.mime import base
 from http.client import CannotSendRequest
@@ -39,7 +40,7 @@ class EasyPark(Tk):
         self.frames = {}
 
         for F in (LoginPage, AdminPage, AdminControl, UserPage, RenterPage, RenterReservationPage,  ClientPage,  SearchPage, ParkingDisplayPage,
-                  AddParkingPage, ParkingSpotPage, ModifySpotPage, ClientReservationPage, AccountPage, AccountPage, ViewAcctPage,
+                  AddParkingPage, ParkingSpotPage, ModifySpotPage, ClientReservationPage, AccountPage, ViewAcctPage,
                   AcctUpdatePage, AcctDeletePage, ReportPage, SignUpPage):
             frame = F(container, self)
             self.frames[F] = frame
@@ -159,11 +160,10 @@ class AdminControl(Frame):
             res = session.get(baseURL + '/parking/admin/') # Retriveing csrftoken 
             csrftoken = res.cookies['csrftoken']
             # using csrftoken in POST request
-            print(self.price_entry.get())
-            data = {'csrfmiddlewaretoken': csrftoken, 'hourly_rate' : self.price_entry.get()}
 
+            data = {'csrfmiddlewaretoken': csrftoken, 'hourly_rate' : self.price_entry.get()}
             res = session.post(baseURL + '/parking/admin/', data=data)
-            print(res.json())
+
             if(res.json() == "Updated hourly rate"):
                 messagebox.showinfo(title="Success!", message="Hourly rate has been updated")
                 controller.show_frame(AdminPage)
@@ -228,8 +228,14 @@ class RenterPage(Frame):
         label = Label(self, text="Renter Page", font=TitleFont)
         label.pack(pady=20)
 
+        def loadReservation():
+            res = session.get(baseURL + '/parking/reserve/')
+            
+
+            controller.show_frame(RenterReservationPage)
+
         Button(self, text="Search For Parking", font=TextFont, bg="white", command=lambda: controller.show_frame(SearchPage)).pack(pady=20)
-        Button(self, text="View Reservation", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterReservationPage)).pack(pady=20)
+        Button(self, text="View Reservation", font=TextFont, bg="white", command=loadReservation).pack(pady=20)
         Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).pack(pady=20)
 
 
@@ -243,13 +249,14 @@ class ClientPage(Frame):
         def loadClientParkingSpot():
 
             res = session.get(baseURL + '/parking/?client=yes')
+            rate = session.get(baseURL + '/parking/admin/')
 
             if (len(res.json()) == 1):
                 controller.frames[ParkingSpotPage].location1.config(
                     text="Location: " + res.json()[0]['street_address'] + ", " + res.json()[0]['city'] + ", " +
                          res.json()[0]['state'] + " " + res.json()[0]['zip_code']
                          + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0][
-                             'end_date'] + "\nHourly Rate: $1.50")
+                             'end_date'] + "\nHourly Rate: $" + rate.json()['hourly_rate'])
 
                 if res.json()[0]['image'] != None:
                     raw_data = urlopen(baseURL + res.json()[0]['image']).read()
@@ -264,12 +271,12 @@ class ClientPage(Frame):
                     text="Location: " + res.json()[0]['street_address'] + ", " + res.json()[0]['city'] + ", " +
                          res.json()[0]['state'] + " " + res.json()[0]['zip_code']
                          + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0][
-                             'end_date'] + "\nHourly Rate: $1.50")
+                             'end_date'] + "\nHourly Rate: $" + rate.json()['hourly_rate'])
                 controller.frames[ParkingDisplayPage].location2.config(
                     text="Location: " + res.json()[1]['street_address'] + ", " + res.json()[1]['city'] + ", " +
                          res.json()[1]['state'] + " " + res.json()[1]['zip_code']
                          + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1][
-                             'end_date'] + "\nHourly Rate: $1.50")
+                             'end_date'] + "\nHourly Rate: $" + rate.json()['hourly_rate'])
                 controller.show_frame(ParkingSpotPage)
 
                 if res.json()[0]['image'] != None:
@@ -315,12 +322,14 @@ class RenterReservationPage(Frame):
         self.garage1 = Label(self, image=garage_img)
         self.garage1.image = garage_img
         self.garage1.grid(row=1, column=0, pady=15, columnspan=2)
-        resv_label = Label(self, text="Owner of Parking Spot: " + clientname + "\n" + "Location: " + address + "\n" + "Time Slot: " + timeseleted + "\n" + "Total: $0.00" + total)
-        resv_label.grid(row=2, column=0, columnspan=2)
+        
+        self.resv_label = Label(self, text="Owner of Parking Spot: " + clientname + "\n" + "Location: " + address + "\n" + "Time Slot: " + timeseleted + "\n" + "Total: $0.00" + total)
+        self.resv_label.grid(row=2, column=0, columnspan=2)
+        
         Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
         Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
 
-        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=4, column=0, pady=15, columnspan=2)
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=4, column=0, pady=15, columnspan=2)
 
 
 # Renter Search Page
@@ -391,10 +400,10 @@ class SearchPage(Frame):
                 messagebox.showerror('Error', 'Please fill in all * area')
             else:
                 res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get() +'/'+str(end_cal.get_date())+':'+end_clicked.get())
-            
+                rate = session.get(baseURL + '/parking/admin/')
                 if len(res.json()) == 1:
                     controller.frames[ParkingDisplayPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code']
-                    + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50")
+                    + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $" + rate.json()['hourly_rate'])
 
                     controller.frames[ParkingDisplayPage].spot_id1.set(res.json()[0]['id'])
                     controller.frames[ParkingDisplayPage].client_id1.set(res.json()[0]['client_id'])
@@ -411,9 +420,9 @@ class SearchPage(Frame):
                 
                 elif( len(res.json()) == 2):
                     controller.frames[ParkingDisplayPage].location1.config(text="Location: " + res.json()[0]['street_address']+", " + res.json()[0]['city']+", " + res.json()[0]['state'] + " " + res.json()[0]['zip_code'] 
-                    + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $1.50" )
+                    + "\n" + "Time: " + res.json()[0]['start_date'] + "-" + res.json()[0]['end_date'] + "\nHourly Rate: $$" + rate.json()['hourly_rate'])
                     controller.frames[ParkingDisplayPage].location2.config(text="Location: " + res.json()[1]['street_address']+", " + res.json()[1]['city']+", " + res.json()[1]['state'] + " " + res.json()[1]['zip_code'] 
-                    + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $1.50" )
+                    + "\n" + "Time: " + res.json()[1]['start_date'] + "-" + res.json()[1]['end_date'] + "\nHourly Rate: $$" + rate.json()['hourly_rate'])
                     controller.show_frame(ParkingDisplayPage)
 
                     controller.frames[ParkingDisplayPage].spot_id1.set(res.json()[0]['id'])
@@ -610,13 +619,13 @@ class AddParkingPage(Frame):
         end_time.grid(row=2, column=2)
 
         # Location - Street, City, State, Zipcode
-        Label(self, text="Street:*", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
+        Label(self, text="Street:", font=TextFont).grid(row=4, column=0, pady=15, sticky="e")
         street_entry = Entry(self, font=TextFont)
         street_entry.grid(row=4, column=1)
-        Label(self, text="City:* ", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
+        Label(self, text="City:", font=TextFont).grid(row=5, column=0, pady=15, sticky="e")
         city_entry = Entry(self, font=TextFont)
         city_entry.grid(row=5, column=1)
-        Label(self, text="State:*", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
+        Label(self, text="State:", font=TextFont).grid(row=6, column=0, pady=15, sticky="e")
         state_entry = Entry(self, font=TextFont)
         state_entry.grid(row=6, column=1)
         Label(self, text="Zip Code:*", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
@@ -839,8 +848,26 @@ class AccountPage(Frame):
         label = Label(self, text="Account", font=TitleFont)
         label.pack(pady=20)
 
+
+        def view_account():
+
+            user_info = session.get(baseURL + '/users/').json()
+            user_bank_info = session.get(baseURL + '/payment/').json()
+            
+            controller.frames[ViewAcctPage].fn_display.config(text="First Name: " + user_info['first_name'])
+            controller.frames[ViewAcctPage].ln_display.config(text="Last Name: " + user_info['last_name'])
+            controller.frames[ViewAcctPage].email_display.config(text="Email Address: " + user_info['email'])
+            controller.frames[ViewAcctPage].phone_display.config(text="Phone#: " + user_info['phoneNum'])
+
+            controller.frames[ViewAcctPage].bank_display.config(text="Bank Name: " + user_bank_info['bank_name'])
+            controller.frames[ViewAcctPage].routing_display.config(text="Routing Number: " + user_bank_info['routing_number'])
+            controller.frames[ViewAcctPage].account_display.config(text="Account Number: " + user_bank_info['account_number'])
+
+            controller.show_frame(ViewAcctPage)
+
+
         #  View Account
-        view_button = Button(self, text="View Account", font=TextFont, bg="white", command=lambda: controller.show_frame(ViewAcctPage))
+        view_button = Button(self, text="View Account", font=TextFont, bg="white", command=view_account)
         view_button.pack(pady=20)
         # Update Account
         edit_button = Button(self, text="Update Account", font=TextFont, bg="white", command=lambda: controller.show_frame(AcctUpdatePage))
@@ -868,28 +895,34 @@ class ViewAcctPage(Frame):
         account_display = "N/A"
 
         # First Name
-        Label(self, text="First Name: " + fn_display, font=TextFont).pack(pady=10)
+        self.fn_display = Label(self, text="First Name: " + fn_display, font=TextFont)
+        self.fn_display.pack(pady=10)
 
         # Last Name
-        Label(self, text="Last Name: " + ln_display, font=TextFont).pack(pady=10)
+        self.ln_display = Label(self, text="Last Name: " + ln_display, font=TextFont)
+        self.ln_display.pack(pady=10)
 
         # Email
-        Label(self, text="Email Address: " + email_display, font=TextFont).pack(pady=10)
+        self.email_display = Label(self, text="Email Address: " + email_display, font=TextFont)
+        self.email_display.pack(pady=10)
 
         # Phone Number
-        Label(self, text="Phone#: " + phone_display, font=TextFont).pack(pady=10)
+        self.phone_display = Label(self, text="Phone#: " + phone_display, font=TextFont)
+        self.phone_display.pack(pady=10)
 
         # Bank Info
-        Label(self, text="Bank Name: " + bank_display, font=TextFont).pack(pady=10)
+        self.bank_display = Label(self, text="Bank Name: " + bank_display, font=TextFont)
+        self.bank_display.pack(pady=10)
 
         # Routing Number
-        Label(self, text="Routing Number: " + routing_display, font=TextFont).pack(pady=10)
+        self.routing_display = Label(self, text="Routing Number: " + routing_display, font=TextFont)
+        self.routing_display.pack(pady=10)
 
         # Account Number
-        Label(self, text="Account Number: " + account_display, font=TextFont).pack(pady=10)
+        self.account_display = Label(self, text="Account Number: " + account_display, font=TextFont)
+        self.account_display.pack(pady=10)
         
-        Button(self, text="Back", command=lambda: controller.show_frame(AccountPage), font=TextFont).pack(pady=10)
-
+        Button(self, text="Back", command=lambda:controller.show_frame(AccountPage), font=TextFont).pack(pady=10)
 
 # Update Account page
 class AcctUpdatePage(Frame):
