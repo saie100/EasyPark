@@ -8,6 +8,5 @@ router.register(r'signin', SignIn)
 router.register(r'signout', SignOut)
 router.register(r'update', UpdateAccount)
 router.register(r'delete', DeleteAccount)
-
 router.register(r'', UserView)
 urlpatterns = router.urls
