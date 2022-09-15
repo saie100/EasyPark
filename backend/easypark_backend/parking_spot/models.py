@@ -10,7 +10,6 @@ class ParkingSpot(models.Model):
     city = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=100, blank=True, null=True)
-    vehicle_type = models.CharField(max_length=100, blank=True, null=True) #Compact, SUV, Standard, and Oversized
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     image = models.ImageField(upload_to='images/garage/')
@@ -36,7 +35,6 @@ class Reservations(models.Model):
     parking_spot = models.ForeignKey(ParkingSpot, on_delete=models.CASCADE, blank=True, null=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    
-    
+
     class Meta:
         ordering = ['-date_updated']

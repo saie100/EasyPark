@@ -1,6 +1,8 @@
 from http import client
+from importlib.abc import PathEntryFinder
 import re
 from tracemalloc import start
+from django.forms import SelectDateWidget
 from django.shortcuts import render
 from datetime import datetime
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -31,7 +33,6 @@ class ParkingSpotView(viewsets.ModelViewSet):
         city = request.data['city']
         state = request.data['state']
         zip_code = request.data['zip_code']
-        vehicle_type = request.data['vehicle_type']
         start_date = request.data['start_date']
         end_date = request.data['end_date']
         start_time = request.data['start_time']
@@ -44,7 +45,7 @@ class ParkingSpotView(viewsets.ModelViewSet):
         new_end_date = datetime.strptime(end_date + " " + end_time+":00", "%Y-%m-%d %H:%M:%S")
 
         try:
-            new_spot = ParkingSpot.objects.create(client=client, street_address=street_address, city=city, state=state, zip_code=zip_code, vehicle_type=vehicle_type, start_date=new_start_date, end_date=new_end_date)
+            new_spot = ParkingSpot.objects.create(client=client, street_address=street_address, city=city, state=state, zip_code=zip_code, start_date=new_start_date, end_date=new_end_date)
             new_spot.image.save(str(new_spot.id)+'.jpg', file_content, save=False)
             new_spot.save()
             return Response("New Spot Created")
@@ -57,7 +58,7 @@ class ParkingSpotView(viewsets.ModelViewSet):
             self.queryset = ParkingSpot.objects.filter(client=request.user).order_by('-date_created')[:2]
             return Response(self.serializer_class(self.queryset, many=True).data)
         else:
-            print(request.GET.get('date') )
+            #print(request.GET.get('date') )
             
             if(request.GET.get('date')):
                 start_end_date = request.GET.get('date')
@@ -68,11 +69,10 @@ class ParkingSpotView(viewsets.ModelViewSet):
                 start = datetime.strptime(start_date+":00", "%Y-%m-%d:%H:%M:%S")
                 end = datetime.strptime(end_date+":00", "%Y-%m-%d:%H:%M:%S")
 
-                zip_code_values = list(ParkingSpot.objects.filter(start_date__lte=start).filter(end_date__gte=end).values_list('zip_code', flat=True))
-                print(zip_code_values)
-                self.queryset = ParkingSpot.objects.filter(zip_code__in=zip_code_values).order_by('-id')[:2]
-                
-                #self.queryset = ParkingSpot.objects.filter().order_by('-id')[:2]
+                execluded_spot = Reservations.objects.filter(end_date__gte=start).values_list('parking_spot', flat=True)
+                new_query = ParkingSpot.objects.exclude(id__in=list(execluded_spot))
+                new_query = new_query.filter(end_date__gte=end)
+                self.queryset = new_query.order_by('-start_date')[:2]
             
                 return Response(self.serializer_class(self.queryset, many=True).data)
             else:
@@ -111,12 +111,43 @@ class ReservationView(viewsets.ModelViewSet):
     def list(self, request):
         
         if(request.GET.get('renter') == 'yes'):
-            self.queryset = ParkingSpot.objects.filter(renter=request.user).order_by('-date_created')[:2]
+            print("here")
+            self.queryset = Reservations.objects.filter(renter=request.user).order_by('-date_created')[:2]
+            print(self.queryset.values_list())
+            
             return Response(self.serializer_class(self.queryset, many=True).data)
         else:
-            self.queryset = ParkingSpot.objects.filter(client=request.user).order_by('-date_created')[:2]
+            self.queryset = Reservations.objects.filter(client=request.user).order_by('-date_created')[:2]
             return Response(self.serializer_class(self.queryset, many=True).data)
 
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class DeleteReservation(viewsets.ModelViewSet):
+    queryset = Reservations.objects.all()
+    serializer_class = ReservationSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def create(self, request):
+        
+        parking_spot_id = int(request.data['parking_spot_id'])
+        parking_spot = ParkingSpot.objects.get(id=parking_spot_id)
+
+        time_slot = request.data['time_slot']
+        start_time = time_slot.split(' - ')[0]
+        end_time = time_slot.split(' - ')[1]
+
+        new_start_time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
+        new_end_time = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%SZ")
+        
+        if(request.data['deleter'] == 'renter'):
+            reserv = Reservations.objects.get(renter=request.user, parking_spot=parking_spot, start_date=new_start_time, end_date=new_end_time )
+            reserv.delete()
+            return Response("Reservation Deleted")
+        else:
+            return Response("Ok")
+
+    
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class AdminView(viewsets.ModelViewSet):

@@ -229,10 +229,90 @@ class RenterPage(Frame):
         label.pack(pady=20)
 
         def loadReservation():
-            res = session.get(baseURL + '/parking/reserve/')
+            res = session.get(baseURL + '/parking/reserve/?renter=yes')
+            if(len(res.json()) == 0):
+                
+                garage = Image.open("no_image.png").resize((200, 150))
+                garage_img = ImageTk.PhotoImage(garage)
+
+                clientname = "N/A"
+                address = "N/A"
+                timeseleted = "N/A"
+                total = "$0.00"
+
+                controller.frames[RenterReservationPage].resv_label1.config(text="Owner of Parking Spot: " + clientname + "\n" + "Location: " + address + "\n" + "Time Slot: " + timeseleted + "\n" + "Total: " + total)
+                controller.frames[RenterReservationPage].resv_label2.config(text="Owner of Parking Spot: " + clientname + "\n" + "Location: " + address + "\n" + "Time Slot: " + timeseleted + "\n" + "Total: " + total)
+
+                controller.frames[RenterReservationPage].garage1.config(image=garage_img)
+                controller.frames[RenterReservationPage].garage1.image = garage_img
+                controller.frames[RenterReservationPage].garage2.config(image=garage_img)
+                controller.frames[RenterReservationPage].garage2.image = garage_img
+
+                controller.frames[RenterReservationPage].parking_spot_id1.set(0)
+                controller.frames[RenterReservationPage].parking_spot_id2.set(0)
+                
+            elif(len(res.json()) == 1):
+
+                controller.frames[RenterReservationPage].resv_label1.config(text="Owner of Parking Spot: " + res.json()[0]['client']['first_name'] + 
+                " " + res.json()[0]['client']['last_name'] + "\n" + "Location: " + res.json()[0]['parking_spot']['street_address'] + ", "
+                + res.json()[0]['parking_spot']['city'] + ", " + res.json()[0]['parking_spot']['state'] + " " + res.json()[0]['parking_spot']['zip_code'] + 
+                "\n" + "Time Slot: " + res.json()[0]['start_date'] + 
+                " - " + res.json()[0]['end_date']+ "\n" + "Total: " + "$3.00")
+
+                controller.frames[RenterReservationPage].time_slot1.set(res.json()[0]['start_date'] + 
+                " - " + res.json()[0]['end_date'])
+
+                controller.frames[RenterReservationPage].parking_spot_id1.set(res.json()[0]['parking_spot_id'])
+
+                if res.json()[0]['parking_spot']['image'] != None:
+                    raw_data = urlopen(baseURL + res.json()[0]['parking_spot']['image']).read()
+                    im = Image.open(BytesIO(raw_data))
+                    im = im.resize((200, 150), Image.ANTIALIAS)
+                    photo = ImageTk.PhotoImage(im)
+                    controller.frames[RenterReservationPage].garage1.config(image=photo)
+                    controller.frames[RenterReservationPage].garage1.image = photo
+
+            elif len(res.json()) == 2:
+                controller.frames[RenterReservationPage].resv_label1.config(text="Owner of Parking Spot: " + res.json()[0]['client']['first_name'] + 
+                " " + res.json()[0]['client']['last_name'] + "\n" + "Location: " + res.json()[0]['parking_spot']['street_address'] + ", "
+                + res.json()[0]['parking_spot']['city'] + ", " + res.json()[0]['parking_spot']['state'] + " " + res.json()[0]['parking_spot']['zip_code'] + 
+                "\n" + "Time Slot: " + res.json()[0]['start_date'] + 
+                " - " + res.json()[0]['end_date']+ "\n" + "Total: " + "$3.00")
+
+                controller.frames[RenterReservationPage].resv_label2.config(text="Owner of Parking Spot: " + res.json()[1]['client']['first_name'] + 
+                " " + res.json()[1]['client']['last_name'] + "\n" + "Location: " + res.json()[1]['parking_spot']['street_address'] + ", "
+                + res.json()[1]['parking_spot']['city'] + ", " + res.json()[1]['parking_spot']['state'] + " " + res.json()[1]['parking_spot']['zip_code'] + 
+                "\n" + "Time Slot: " + res.json()[1]['start_date'] + 
+                " - " + res.json()[1]['end_date']+ "\n" + "Total: " + "$3.00")
+
+                controller.frames[RenterReservationPage].time_slot1.set(res.json()[0]['start_date'] + 
+                " - " + res.json()[0]['end_date'])
+                controller.frames[RenterReservationPage].time_slot2.set(res.json()[1]['start_date'] + 
+                " - " + res.json()[1]['end_date'])
+
+                controller.frames[RenterReservationPage].parking_spot_id1.set(res.json()[0]['parking_spot_id'])
+                controller.frames[RenterReservationPage].parking_spot_id2.set(res.json()[1]['parking_spot_id'])
+
+                controller.show_frame(RenterReservationPage)
+
+                if res.json()[0]['parking_spot']['image']  != None:
+                    raw_data1 = urlopen(baseURL + res.json()[0]['parking_spot']['image']).read()
+                    im1 = Image.open(BytesIO(raw_data1))
+                    im1 = im1.resize((200, 150), Image.ANTIALIAS)
+                    photo1 = ImageTk.PhotoImage(im1)
+                    controller.frames[RenterReservationPage].garage1.config(image=photo1)
+                    controller.frames[RenterReservationPage].garage1.image = photo1
+                if res.json()[1]['parking_spot']['image'] != None:
+                    raw_data2 = urlopen(baseURL + res.json()[1]['parking_spot']['image']).read()
+                    im2 = Image.open(BytesIO(raw_data2))
+                    im2 = im2.resize((200, 150), Image.ANTIALIAS)
+                    photo2 = ImageTk.PhotoImage(im2)
+                    controller.frames[RenterReservationPage].garage2.config(image=photo2)
+                    controller.frames[RenterReservationPage].garage2.image = photo2
             
 
             controller.show_frame(RenterReservationPage)
+
 
         Button(self, text="Search For Parking", font=TextFont, bg="white", command=lambda: controller.show_frame(SearchPage)).pack(pady=20)
         Button(self, text="View Reservation", font=TextFont, bg="white", command=loadReservation).pack(pady=20)
@@ -311,25 +391,76 @@ class RenterReservationPage(Frame):
         label = Label(self, text="Reservation", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        garage = Image.open("no_image.png").resize((200, 150))
-        garage_img = ImageTk.PhotoImage(garage)
+        def deleteReservation(num):
+            res = session.get(baseURL + '/parking/deletereserve/') # Retriveing csrftoken 
+            csrftoken = res.cookies['csrftoken']
+            # using csrftoken in POST request            
+            
+            if(num == 1 and self.parking_spot_id1.get() > 0 ):
+                data = {'csrfmiddlewaretoken': csrftoken, 'deleter' : 'renter', 'time_slot' : self.time_slot1.get(), 'parking_spot_id': self.parking_spot_id1.get() }
+                res = session.post(baseURL + '/parking/deletereserve/', data=data)
+                print(res.json())
+                if(res.json() == "Reservation Deleted"):
+                    print("deleted reservation")
+                    messagebox.showinfo(title="Success!", message="Reservation Deleted")
+                    controller.show_frame(RenterPage)
+                else:
+                    messagebox.showerror('Error', 'Something Went Wrong in the backend')
+            
+            elif(num == 2 and self.parking_spot_id2.get() > 0):
+                data = {'csrfmiddlewaretoken': csrftoken, 'deleter' : 'renter', 'time_slot' : self.time_slot2.get(), 'parking_spot_id': self.parking_spot_id2.get()}
+                res = session.post(baseURL + '/parking/deletereserve/', data=data)
+                print(res.json())
+                if(res.json() == "Reservation Deleted"):
+                    print("deleted reservation")
+                    messagebox.showinfo(title="Success!", message="Reservation Deleted")
+                    controller.show_frame(RenterPage)
+                else:
+                    messagebox.showerror('Error', 'Something Went Wrong in the backend')
+            else:
+                messagebox.showerror('Error', 'No Reservation')
+                
 
-        clientname = "N/A"
-        address = "N/A"
-        timeseleted = "N/A"
-        total = ""
+        self.time_slot1 = StringVar()
+        self.time_slot2 = StringVar()
 
-        self.garage1 = Label(self, image=garage_img)
-        self.garage1.image = garage_img
-        self.garage1.grid(row=1, column=0, pady=15, columnspan=2)
+        self.parking_spot_id1 = IntVar()
+        self.parking_spot_id2 = IntVar()
+
+
+
+        garage1 = Image.open("no_image.png").resize((200, 150))
+        garage_img1 = ImageTk.PhotoImage(garage1)
+
+        garage2 = Image.open("no_image.png").resize((200, 150))
+        garage_img2 = ImageTk.PhotoImage(garage2)
+
+        clientname1 = "N/A"
+        address1 = "N/A"
+        timeseleted1 = "N/A"
+        total1 = "$0.00"
+
+        clientname2 = "N/A"
+        address2 = "N/A"
+        timeseleted2 = "N/A"
+        total2 = "$0.00"
+
+        self.garage1 = Label(self, image=garage_img1)
+        self.garage1.image = garage_img1
+        self.garage1.grid(row=1, column=0, pady=15)
         
-        self.resv_label = Label(self, text="Owner of Parking Spot: " + clientname + "\n" + "Location: " + address + "\n" + "Time Slot: " + timeseleted + "\n" + "Total: $0.00" + total)
-        self.resv_label.grid(row=2, column=0, columnspan=2)
-        
-        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
-        Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+        self.resv_label1 = Label(self, font=TextFont, text="Owner of Parking Spot: " + clientname1 + "\n" + "Location: " + address1 + "\n" + "Time Slot: " + timeseleted1 + "\n" + "Total: " + total1)
+        self.resv_label1.grid(row=2, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white", command=lambda: deleteReservation(1)).grid(row=2, column=1, pady=15, padx=10)
 
-        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=4, column=0, pady=15, columnspan=2)
+        self.garage2 = Label(self, image=garage_img2)
+        self.garage2.image = garage_img2
+        self.garage2.grid(row=3, column=0, pady=15)
+        self.resv_label2 = Label(self, font=TextFont, text="Owner of Parking Spot: " + clientname2 + "\n" + "Location: " + address2 + "\n" + "Time Slot: " + timeseleted2 + "\n" + "Total: " + total2)
+        self.resv_label2.grid(row=4, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white", command=lambda: deleteReservation(2)).grid(row=4, column=1, pady=15, padx=10)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=5, column=0, pady=15, columnspan=2)
 
 
 # Renter Search Page
@@ -348,8 +479,6 @@ class SearchPage(Frame):
 
         end_clicked = StringVar()
         end_clicked.set(time_option[0])
-
-        v_type = StringVar()
 
         # Start Date & Time
         Label(self, text="Start Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
@@ -382,21 +511,10 @@ class SearchPage(Frame):
         zipcode_entry = Entry(self, font=TextFont)
         zipcode_entry.grid(row=6, column=1)
 
-        # Vehicle Type
-        Label(self, text="Vehicle Type:*", font=TextFont).grid(row=7, column=0, pady=15, sticky="e")
-        v_type.set("Compact")
-        vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
-        vehicle_type1.grid(row=7, column=1, sticky="w")
-        vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
-        vehicle_type2.grid(row=7, column=2, sticky="w")
-        vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
-        vehicle_type3.grid(row=8, column=1, pady=5, sticky="w")
-        vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
-        vehicle_type4.grid(row=8, column=2, sticky="w")
 
         def loadSearchPage():
             res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get() +'/'+str(end_cal.get_date())+':'+end_clicked.get())
-            if not zipcode_entry.get() or not start_cal.get() or not end_cal.get() or not v_type.get():
+            if not zipcode_entry.get() or not start_cal.get() or not end_cal.get():
                 messagebox.showerror('Error', 'Please fill in all * area')
             else:
                 res = session.get(baseURL + '/parking/?date='+str(start_cal.get_date())+':'+ start_clicked.get() +'/'+str(end_cal.get_date())+':'+end_clicked.get())
@@ -449,7 +567,7 @@ class SearchPage(Frame):
                     messagebox.showerror("No Parking Spot Found", message="Change search parameters and try again")
 
         Button(self, text="Search", font=TextFont, bg="white", command=loadSearchPage).grid(row=9, column=2, pady=15, sticky="e")
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=9, column=0, pady=15, sticky="w")
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(RenterPage)).grid(row=9, column=0, pady=15, sticky="w")
 
 
 # Renter - Display Parking
@@ -572,7 +690,7 @@ class AddParkingPage(Frame):
         self.filename = StringVar()
 
         def added():
-            if not zipcode_entry.get() or not state_entry.get() or not city_entry.get() or not street_entry.get() or not start_cal.get() or not end_cal.get() or not v_type.get():
+            if not zipcode_entry.get() or not state_entry.get() or not city_entry.get() or not street_entry.get() or not start_cal.get() or not end_cal.get():
                 messagebox.showerror('Error', 'Please fill in all * area')
             else:
                 # When doing post requests we need to retrieve the csrftoken with a GET request then we can do a POST request
@@ -581,7 +699,7 @@ class AddParkingPage(Frame):
                 # using csrftoken in POST request
                 data = {'csrfmiddlewaretoken': csrftoken, 'street_address': street_entry.get().lower(),
                         'city': city_entry.get().lower(), 'state': state_entry.get().lower(),
-                        'zip_code': zipcode_entry.get(), 'vehicle_type': v_type.get().lower(),
+                        'zip_code': zipcode_entry.get(), 
                         'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),
                         'end_date': end_cal.get_date(), 'end_time': clicked_end.get()}
                 files = {'media': open(self.filename.get(), 'rb')}
@@ -602,7 +720,6 @@ class AddParkingPage(Frame):
             except Exception as e:
                 print(e)
 
-        v_type = StringVar()
 
         # Start Date & Time
         Label(self, text="Start Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
@@ -632,17 +749,6 @@ class AddParkingPage(Frame):
         zipcode_entry = Entry(self, font=TextFont)
         zipcode_entry.grid(row=7, column=1)
 
-        # Vehicle Type
-        Label(self, text="Vehicle Type Fit In Garage:*", font=TextFont).grid(row=8, column=0, pady=15, sticky="e")
-        v_type.set("Compact")
-        vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
-        vehicle_type1.grid(row=8, column=1, sticky="w")
-        vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
-        vehicle_type2.grid(row=8, column=2, sticky="w")
-        vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
-        vehicle_type3.grid(row=9, column=1, pady=5, sticky="w")
-        vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
-        vehicle_type4.grid(row=9, column=2, sticky="w")
 
         # Upload image
         Label(self, text="Image: ", font=TextFont).grid(row=10, column=0, pady=15, sticky="e")
@@ -658,7 +764,7 @@ class ParkingSpotPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         label = Label(self, text="My Parking Spots", font=TitleFont)
-        label.grid(row=0, column=0, columnspan= 2, pady=15)
+        label.grid(row=0, column=0, columnspan=3, pady=15)
 
         def delete(spotNum):
             messagebox.showinfo(title="Success", message="Parking Spot Deleted")
@@ -701,7 +807,7 @@ class ParkingSpotPage(Frame):
         self.garage2.image = garage2_img
         self.garage2.grid(row=3, column=0, pady=15)
         self.location2 = Label(self, text="Location: " + address2 + "\n" + "Time: " + availabletime2 + "\n" + "Hours Rate: " + hourly_rate)
-        self.location2.grid(row=4, column=0, sticky="w")
+        self.location2.grid(row=4, column=0)
         
         modify2 = Button(self, text="Modify", command=lambda: modify(2), bg="white", font=TextFont)
         modify2.grid(row=4, column=1)
@@ -738,7 +844,7 @@ class ModifySpotPage(Frame):
             # using csrftoken in POST request
             data = {'csrfmiddlewaretoken': csrftoken, 'street_address': street_entry.get().lower(),
                     'city': city_entry.get().lower(), 'state': state_entry.get().lower(),
-                    'zip_code': zipcode_entry.get(), 'vehicle_type': v_type.get().lower(),
+                    'zip_code': zipcode_entry.get(),
                     'start_date': start_cal.get_date(), 'start_time': clicked_start.get(),
                     'end_date': end_cal.get_date(), 'end_time': clicked_end.get()}
 
@@ -762,8 +868,6 @@ class ModifySpotPage(Frame):
                 img = Image.open(self.filename.get())
             except Exception as e:
                 print(e)
-
-        v_type = StringVar()
 
         # Start Date & Time
         Label(self, text="Start Day & Time:*", font=TextFont).grid(row=1, column=0, pady=15, sticky="e")
@@ -793,25 +897,13 @@ class ModifySpotPage(Frame):
         zipcode_entry = Entry(self, font=TextFont)
         zipcode_entry.grid(row=7, column=1)
 
-        # Vehicle Type
-        Label(self, text="Vehicle Type Fit In Garage:*", font=TextFont).grid(row=8, column=0, pady=15, sticky="e")
-        v_type.set("Compact")
-        vehicle_type1 = Radiobutton(self, text="Compact", variable=v_type, value="Compact", font=TextFont)
-        vehicle_type1.grid(row=8, column=1, sticky="w")
-        vehicle_type2 = Radiobutton(self, text="Standard", variable=v_type, value="Standard", font=TextFont)
-        vehicle_type2.grid(row=8, column=2, sticky="w")
-        vehicle_type3 = Radiobutton(self, text="SUV", variable=v_type, value="SUV", font=TextFont)
-        vehicle_type3.grid(row=9, column=1, pady=5, sticky="w")
-        vehicle_type4 = Radiobutton(self, text="Oversize", variable=v_type, value="Oversize", font=TextFont)
-        vehicle_type4.grid(row=9, column=2, sticky="w")
-
         # Upload image
         Label(self, text="Image: ", font=TextFont).grid(row=10, column=0, pady=15, sticky="e")
         # Button(self, text="image path", command=open_img).grid(row=7, column=1, pady=15)
         Button(self, text="upload", font=TextFont, command=save_png, bg="white").grid(row=10, column=1, pady=15)
 
         Button(self, text="Save", font=TextFont, bg="white", command=added).grid(row=11, column=2, pady=15)
-        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(
+        Button(self, text="Back", font=TextFont, bg="white", command=lambda: controller.show_frame(ParkingSpotPage)).grid(
             row=11, column=0, pady=15, sticky="e")
 
 
@@ -822,23 +914,37 @@ class ClientReservationPage(Frame):
         label = Label(self, text="Reservation", font=TitleFont)
         label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        garage = Image.open("no_image.png").resize((200, 150))
-        garage_img = ImageTk.PhotoImage(garage)
+        garage1 = Image.open("no_image.png").resize((200, 150))
+        garage_img1 = ImageTk.PhotoImage(garage1)
 
-        rentername = "N/A"
-        address = "N/A"
-        timeseleted = "N/A"
-        total = "N/A"
+        garage2 = Image.open("no_image.png").resize((200, 150))
+        garage_img2 = ImageTk.PhotoImage(garage2)
 
-        self.garage1 = Label(self, image=garage_img)
-        self.garage1.image = garage_img
-        self.garage1.grid(row=1, column=0, pady=15, columnspan=2)
-        resv_label = Label(self, text="Renter: " + rentername + "\n" + "Location: " + address + "\n" + "Time: " + timeseleted + "\n" + "Total: " + total)
-        resv_label.grid(row=2, column=0, columnspan=2)
-        Button(self, text="modify", font=TextFont, bg="white").grid(row=3, column=0, pady=15)
-        Button(self, text="cancel", font=TextFont, bg="white").grid(row=3, column=1, pady=15)
+        rentername1 = "N/A"
+        address1 = "N/A"
+        timeseleted1 = "N/A"
+        totalhrs1 = "0"
 
-        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(UserPage)).grid(row=4, column=0, pady=15, columnspan=2)
+        rentername2 = "N/A"
+        address2 = "N/A"
+        timeseleted2 = "N/A"
+        totalhrs2 = "0"
+
+        self.garage1 = Label(self, image=garage_img1)
+        self.garage1.image = garage_img1
+        self.garage1.grid(row=1, column=0, pady=15)
+        resv_label = Label(self, font=TextFont, text="Renter: " + rentername1 + "\n" + "Location: " + address1 + "\n" + "Time: " + timeseleted1 + "\n" + "Total hours: " + totalhrs1)
+        resv_label.grid(row=2, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=2, column=1, pady=15, padx=10)
+
+        self.garage2 = Label(self, image=garage_img2)
+        self.garage2.image = garage_img2
+        self.garage2.grid(row=3, column=0, pady=15)
+        resv_label = Label(self, font=TextFont, text="Renter: " + rentername2 + "\n" + "Location: " + address2 + "\n" + "Time: " + timeseleted2 + "\n" + "Total hours: " + totalhrs2)
+        resv_label.grid(row=4, column=0)
+        Button(self, text="cancel", font=TextFont, bg="white").grid(row=4, column=1, pady=15, padx=10)
+
+        Button(self, text="back", font=TextFont, bg="white", command=lambda: controller.show_frame(ClientPage)).grid(row=5, column=0, pady=15, columnspan=2)
 
 
 # Account Page
